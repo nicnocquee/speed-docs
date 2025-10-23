@@ -28,6 +28,12 @@ speed-docs <origin-directory> --dev
 speed-docs <origin-directory> --template <template-url>
 ```
 
+### Custom Download Directory
+
+```bash
+speed-docs <origin-directory> --download-dir <path>
+```
+
 ### Examples
 
 ```bash
@@ -39,6 +45,12 @@ speed-docs ./my-content --dev
 
 # Use a custom template
 speed-docs ./my-content --template https://github.com/user/custom-template/archive/main.tar.gz
+
+# Use a custom download/cache directory
+speed-docs ./my-content --download-dir /path/to/custom/cache
+
+# Combine multiple options
+speed-docs ./my-content --dev --download-dir /tmp/my-cache --force
 ```
 
 ## What it does
@@ -50,6 +62,8 @@ Speed-docs automates the entire documentation creation process:
 - Downloads a pre-configured FumaDocs template from GitHub
 - Supports custom template URLs
 - Automatically extracts and sets up the template
+- Caches templates in `~/.speed-docs/cache` by default
+- Supports custom download/cache directories via `--download-dir`
 
 ### 2. **Content Validation**
 
@@ -95,6 +109,16 @@ my-content/
         └── reference.md
 ```
 
+## Command Line Options
+
+| Option                  | Description                                             |
+| ----------------------- | ------------------------------------------------------- |
+| `<origin-directory>`    | Path to your content directory (required)               |
+| `--dev`                 | Run in development mode with file watching              |
+| `--template <url>`      | Override the default template repository URL            |
+| `--force`               | Force redownload and reinstall template (ignores cache) |
+| `--download-dir <path>` | Override the default download/cache directory           |
+
 ## Features
 
 - ✅ **Zero Configuration**: Works out of the box with sensible defaults
@@ -102,6 +126,7 @@ my-content/
 - ✅ **Content Validation**: Comprehensive validation of your content structure
 - ✅ **Image Handling**: Automatic image optimization and placement
 - ✅ **Template Flexibility**: Support for custom templates
+- ✅ **Custom Cache Directory**: Override default download/cache location
 - ✅ **Production Ready**: Optimized builds for deployment
 - ✅ **Cross Platform**: Works on Windows, macOS, and Linux
 
