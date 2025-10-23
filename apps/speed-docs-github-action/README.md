@@ -32,7 +32,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Deploy docs to GitHub Pages
-        uses: nicnocquee/speed-docs-github-action@v1
+        uses: nicnocquee/speed-docs@v0.0.10/apps/speed-docs-github-action
         with:
           content-path: "./docs"
           github-token: ${{ secrets.GITHUB_TOKEN }}
@@ -78,7 +78,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Deploy docs to GitHub Pages
-        uses: nicnocquee/speed-docs-github-action@v1
+        uses: nicnocquee/speed-docs@v0.0.10/apps/speed-docs-github-action
         with:
           content-path: "./docs"
           github-token: ${{ secrets.GITHUB_TOKEN }}

@@ -8,7 +8,7 @@ The GitHub Action is **fully automated** for publishing. You only need to create
 
 1. **Version Sync**: `package.json` version is automatically updated to match the release tag
 2. **Build & Publish**: The action is automatically built and published
-3. **Availability**: The action becomes available as `nicnocquee/speed-docs-github-action@vX.X.X`
+3. **Availability**: The action becomes available as `nicnocquee/speed-docs@vX.X.X/apps/speed-docs-github-action`
 
 ## Quick Start (Automated)
 
@@ -25,7 +25,7 @@ The GitHub Action is **fully automated** for publishing. You only need to create
 2. **Everything else is automatic**:
    - ✅ Version automatically updated in `package.json`
    - ✅ Action built and published
-   - ✅ Available as `nicnocquee/speed-docs-github-action@vX.X.X`
+   - ✅ Available as `nicnocquee/speed-docs@vX.X.X/apps/speed-docs-github-action`
 
 ### Using the Helper Script
 

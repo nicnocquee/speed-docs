@@ -69,26 +69,13 @@ jobs:
           cd apps/speed-docs-github-action
           npm run build
 
-      - name: Create Action Archive
+      - name: Verify Action Structure
         run: |
-          # Create a clean directory for the action
-          mkdir -p /tmp/action-release
-
-          # Copy files to temp directory
-          cp apps/speed-docs-github-action/action.yml /tmp/action-release/
-          cp apps/speed-docs-github-action/README.md /tmp/action-release/
-          cp apps/speed-docs-github-action/package.json /tmp/action-release/
-          cp -r apps/speed-docs-github-action/dist/ /tmp/action-release/
-
-          # Create archive
-          cd /tmp/action-release
-          tar -czf /tmp/speed-docs-github-action.tar.gz *
-
-          # Verify archive was created
-          ls -la /tmp/speed-docs-github-action.tar.gz
-
-      - name: Upload Action Archive
-        run: |
-          gh release upload ${{ github.event.release.tag_name }} /tmp/speed-docs-github-action.tar.gz
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          echo "✅ Action is ready for use from monorepo"
+          echo "Users can now reference: nicnocquee/speed-docs@${{ github.event.release.tag_name }}/apps/speed-docs-github-action"
+          echo ""
+          echo "Action files:"
+          ls -la apps/speed-docs-github-action/
+          echo ""
+          echo "Built files:"
+          ls -la apps/speed-docs-github-action/dist/
