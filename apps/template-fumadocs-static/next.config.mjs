@@ -9,7 +9,7 @@ const config = {
   images: {
     unoptimized: true,
   },
-  basePath: process.env.PAGES_BASE_PATH || "/",
+  basePath: process.env.PAGES_BASE_PATH,
 };
 
 export default withMDX(config);

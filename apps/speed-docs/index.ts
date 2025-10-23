@@ -362,39 +362,8 @@ async function copyDirectory(src: string, dest: string): Promise<void> {
       await copyDirectory(srcPath, destPath);
     }
   } else {
-    // Check if it's an image file
-    const imageExtensions = [
-      ".png",
-      ".jpg",
-      ".jpeg",
-      ".gif",
-      ".svg",
-      ".webp",
-      ".ico",
-    ];
-    const isImageFile = imageExtensions.some((ext) =>
-      src.toLowerCase().endsWith(ext)
-    );
-
-    if (isImageFile) {
-      // Copy image files to public directory (in template)
-      const publicDir = path.join(path.dirname(dest), "..", "public");
-      const fileName = path.basename(src);
-      const publicDestPath = path.join(publicDir, fileName);
-
-      // Ensure public directory exists
-      if (!fs.existsSync(publicDir)) {
-        fs.mkdirSync(publicDir, { recursive: true });
-      }
-
-      fs.copyFileSync(src, publicDestPath);
-      console.log(
-        chalk.blue(`📸 Copied image: ${fileName} to public directory`)
-      );
-    } else {
-      // Copy non-image files to content directory
-      fs.copyFileSync(src, dest);
-    }
+    // Copy all files directly to destination
+    fs.copyFileSync(src, dest);
   }
 }
 
@@ -519,7 +488,7 @@ function watchOriginDirectory(originDir: string, templatePath: string): void {
  */
 async function buildAndCopyOutput(
   templatePath: string,
-  basePath: string = "/"
+  basePath: string = ""
 ): Promise<void> {
   console.log(chalk.blue("🔨 Building documentation..."));
 
@@ -636,7 +605,7 @@ program
       try {
         const resolvedOriginDir = path.resolve(originDir);
 
-        console.log(chalk.blue("🚀 Speed Docs CLI"));
+        console.log(chalk.blue(`🚀 Speed Docs CLI v${version}`));
         console.log(chalk.blue("=================="));
 
         // Show download directory info
@@ -682,7 +651,7 @@ program
         } else {
           // Production mode
           console.log(chalk.green("🏗️  Building for production..."));
-          await buildAndCopyOutput(templatePath, options.basePath || "/");
+          await buildAndCopyOutput(templatePath, options.basePath || "");
         }
       } catch (error) {
         console.error(
