@@ -528,6 +528,7 @@ async function buildAndCopyOutput(
       cwd: templatePath,
       stdio: "inherit",
       env: {
+        ...process.env,
         PAGES_BASE_PATH: basePath,
       },
     });
