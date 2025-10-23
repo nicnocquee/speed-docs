@@ -1,21 +1,33 @@
 name: Release Action
 
 on:
-  workflow_run:
-    workflows: ["Auto-Update Action Version"]
-    types: [completed]
-    branches: [main]
+  release:
+    types: [published]
+    paths:
+      - "apps/speed-docs-github-action/**"
 
 jobs:
   release:
     runs-on: ubuntu-latest
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+
+      - name: Extract version from tag
+        id: version
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/v}
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Release version: $VERSION"
+
+      - name: Update package.json version
+        run: |
+          cd apps/speed-docs-github-action
+          npm version ${{ steps.version.outputs.version }} --no-git-tag-version
+          echo "Updated package.json to version ${{ steps.version.outputs.version }}"
 
       - name: Setup Node.js
         uses: actions/setup-node@v4

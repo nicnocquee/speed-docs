@@ -167,11 +167,10 @@ This GitHub Action is automatically built and published when releases are create
 
 ### Automated Workflows
 
-The publishing process uses three automated workflows:
+The publishing process uses two automated workflows:
 
 1. **Pre-Release Validation**: Validates the release tag and checks readiness
-2. **Auto-Update Version**: Updates `package.json` to match the release tag
-3. **Release Action**: Builds and publishes the action
+2. **Release Action**: Updates version, builds and publishes the action
 
 ### Manual Version Management (Optional)
 

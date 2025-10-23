@@ -37,7 +37,7 @@ This script provides guidance and can optionally update the version manually.
 
 ## Automated Workflows
 
-The publishing process uses three automated workflows:
+The publishing process uses two automated workflows:
 
 ### 1. Pre-Release Validation (`.github/workflows/pre-release-validation.yml`)
 
@@ -49,22 +49,13 @@ The publishing process uses three automated workflows:
   - Validates action.yml
   - Verifies build readiness
 
-### 2. Auto-Update Version (`.github/workflows/auto-update-version.yml`)
+### 2. Release Action (`.github/workflows/release-action.yml`)
 
 - **Triggers**: When a release is published
-- **Purpose**: Automatically syncs package.json version with release tag
+- **Purpose**: Updates version, builds and publishes the action
 - **Actions**:
   - Extracts version from release tag
-  - Updates package.json
-  - Commits the change
-  - Verifies version sync
-
-### 3. Release Action (`.github/workflows/release-action.yml`)
-
-- **Triggers**: After auto-update-version completes successfully
-- **Purpose**: Builds and publishes the action
-- **Actions**:
-  - Verifies version matches release
+  - Updates package.json locally
   - Installs dependencies
   - Builds the action
   - Creates release asset
