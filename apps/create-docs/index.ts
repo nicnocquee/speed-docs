@@ -17,14 +17,15 @@ const TEMPLATE_SUBDIR = "speed-docs-main/apps/template-fumadocs-static";
 /**
  * Downloads the template from GitHub to a temporary directory
  */
-async function downloadTemplate(): Promise<string> {
+async function downloadTemplate(templateUrl?: string): Promise<string> {
   const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "speed-docs-"));
   const tarPath = path.join(tmpDir, "template.tar.gz");
 
-  console.log(chalk.blue("📥 Downloading template from GitHub..."));
+  const repoUrl = templateUrl || TEMPLATE_REPO_URL;
+  console.log(chalk.blue(`📥 Downloading template from: ${repoUrl}`));
 
   try {
-    const response = await fetch(TEMPLATE_REPO_URL);
+    const response = await fetch(repoUrl);
     if (!response.ok) {
       throw new Error(`Failed to download template: ${response.statusText}`);
     }
@@ -456,46 +457,54 @@ program
     "Path to the directory containing your content (config.json and docs/)"
   )
   .option("--dev", "Run in development mode with file watching")
-  .action(async (originDir: string, options: { dev?: boolean }) => {
-    try {
-      const resolvedOriginDir = path.resolve(originDir);
+  .option("--template <url>", "Override the default template repository URL")
+  .action(
+    async (
+      originDir: string,
+      options: { dev?: boolean; template?: string }
+    ) => {
+      try {
+        const resolvedOriginDir = path.resolve(originDir);
 
-      console.log(chalk.blue("🚀 Speed Docs CLI"));
-      console.log(chalk.blue("=================="));
+        console.log(chalk.blue("🚀 Speed Docs CLI"));
+        console.log(chalk.blue("=================="));
 
-      // Download template
-      const templatePath = await downloadTemplate();
+        // Download template
+        const templatePath = await downloadTemplate(options.template);
 
-      // Install dependencies
-      await installDependencies(templatePath);
+        // Install dependencies
+        await installDependencies(templatePath);
 
-      // Copy content
-      await validateAndCopyContent(resolvedOriginDir, templatePath);
+        // Copy content
+        await validateAndCopyContent(resolvedOriginDir, templatePath);
 
-      if (options.dev) {
-        // Development mode
-        console.log(chalk.green("🔧 Starting development mode..."));
-        console.log(chalk.yellow("Press Ctrl+C to stop"));
+        if (options.dev) {
+          // Development mode
+          console.log(chalk.green("🔧 Starting development mode..."));
+          console.log(chalk.yellow("Press Ctrl+C to stop"));
 
-        // Start file watching
-        watchOriginDirectory(resolvedOriginDir, templatePath);
+          // Start file watching
+          watchOriginDirectory(resolvedOriginDir, templatePath);
 
-        // Start dev server
-        runDevMode(templatePath);
-      } else {
-        // Production mode
-        console.log(chalk.green("🏗️  Building for production..."));
-        await buildAndCopyOutput(templatePath);
+          // Start dev server
+          runDevMode(templatePath);
+        } else {
+          // Production mode
+          console.log(chalk.green("🏗️  Building for production..."));
+          await buildAndCopyOutput(templatePath);
+        }
+      } catch (error) {
+        console.error(
+          chalk.red(
+            `❌ Error: ${
+              error instanceof Error ? error.message : String(error)
+            }`
+          )
+        );
+        process.exit(1);
       }
-    } catch (error) {
-      console.error(
-        chalk.red(
-          `❌ Error: ${error instanceof Error ? error.message : String(error)}`
-        )
-      );
-      process.exit(1);
     }
-  });
+  );
 
 // Parse command line arguments
 program.parse();
