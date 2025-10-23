@@ -2,55 +2,125 @@
 
 import fs from "fs";
 import path from "path";
+import { execSync, spawn } from "child_process";
+import os from "os";
+import chalk from "chalk";
+import { Command } from "commander";
+import fetch from "node-fetch";
+import tar from "tar";
+import chokidar from "chokidar";
+
+const TEMPLATE_REPO_URL =
+  "https://github.com/nicnocquee/speed-docs/archive/refs/heads/main.tar.gz";
+const TEMPLATE_SUBDIR = "speed-docs-main/apps/template-fumadocs-static";
 
 /**
- * Validates and copies content from origin directory to content directory
- * @param {string} originDir - The origin directory path
+ * Downloads the template from GitHub to a temporary directory
  */
-async function validateAndCopyContent(originDir: string): Promise<void> {
+async function downloadTemplate(): Promise<string> {
+  const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "speed-docs-"));
+  const tarPath = path.join(tmpDir, "template.tar.gz");
+
+  console.log(chalk.blue("📥 Downloading template from GitHub..."));
+
   try {
-    console.log(`🔍 Validating and copying content from: ${originDir}`);
+    const response = await fetch(TEMPLATE_REPO_URL);
+    if (!response.ok) {
+      throw new Error(`Failed to download template: ${response.statusText}`);
+    }
+
+    const buffer = await response.arrayBuffer();
+    fs.writeFileSync(tarPath, Buffer.from(buffer));
+
+    console.log(chalk.green("✅ Template downloaded successfully"));
+
+    // Extract the tar file
+    console.log(chalk.blue("📦 Extracting template..."));
+    await tar.extract({
+      file: tarPath,
+      cwd: tmpDir,
+    });
+
+    const templatePath = path.join(tmpDir, TEMPLATE_SUBDIR);
+    if (!fs.existsSync(templatePath)) {
+      throw new Error(
+        "Template extraction failed - template directory not found"
+      );
+    }
+
+    console.log(chalk.green("✅ Template extracted successfully"));
+
+    // Clean up tar file
+    fs.unlinkSync(tarPath);
+
+    return templatePath;
+  } catch (error) {
+    console.error(
+      chalk.red(
+        `❌ Error downloading template: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      )
+    );
+    throw error;
+  }
+}
+
+/**
+ * Validates and copies content from origin directory to template content directory
+ */
+async function validateAndCopyContent(
+  originDir: string,
+  templatePath: string
+): Promise<void> {
+  try {
+    console.log(
+      chalk.blue(`🔍 Validating and copying content from: ${originDir}`)
+    );
 
     // Step 1: Check if origin directory exists
     if (!fs.existsSync(originDir)) {
       throw new Error(`❌ Origin directory does not exist: ${originDir}`);
     }
 
-    console.log(`✅ Origin directory exists: ${originDir}`);
+    console.log(chalk.green(`✅ Origin directory exists: ${originDir}`));
 
-    // Step 2: Create/clean content directory (in docs app)
-    const contentDir = path.join(process.cwd(), "..", "docs", "content");
+    // Step 2: Create/clean content directory (in template)
+    const contentDir = path.join(templatePath, "content");
 
     if (fs.existsSync(contentDir)) {
-      console.log(`🗑️  Removing existing content directory...`);
+      console.log(chalk.yellow(`🗑️  Removing existing content directory...`));
       fs.rmSync(contentDir, { recursive: true, force: true });
     }
 
-    console.log(`📁 Creating new content directory...`);
+    console.log(chalk.blue(`📁 Creating new content directory...`));
     fs.mkdirSync(contentDir, { recursive: true });
 
     // Step 3: Validate origin directory content
     await validateOriginDirectory(originDir);
 
     // Step 4: Copy all contents from origin to content directory
-    console.log(`📋 Copying contents from ${originDir} to ${contentDir}...`);
+    console.log(
+      chalk.blue(`📋 Copying contents from ${originDir} to ${contentDir}...`)
+    );
     await copyDirectory(originDir, contentDir);
 
-    console.log(`✅ Successfully validated and copied content!`);
+    console.log(chalk.green(`✅ Successfully validated and copied content!`));
   } catch (error) {
     console.error(
-      `❌ Error: ${error instanceof Error ? error.message : String(error)}`
+      chalk.red(
+        `❌ Error: ${error instanceof Error ? error.message : String(error)}`
+      )
     );
-    process.exit(1);
+    throw error;
   }
 }
 
 /**
  * Validates the origin directory structure and content
- * @param {string} originDir - The origin directory path
  */
 async function validateOriginDirectory(originDir: string): Promise<void> {
-  console.log(`🔍 Validating origin directory structure...`);
+  console.log(chalk.blue(`🔍 Validating origin directory structure...`));
 
   // Check if config.json exists and is valid JSON
   const configPath = path.join(originDir, "config.json");
@@ -61,7 +131,7 @@ async function validateOriginDirectory(originDir: string): Promise<void> {
   try {
     const configContent = fs.readFileSync(configPath, "utf8");
     JSON.parse(configContent);
-    console.log(`✅ config.json is valid JSON`);
+    console.log(chalk.green(`✅ config.json is valid JSON`));
   } catch (error) {
     throw new Error(
       `config.json is not valid JSON: ${
@@ -80,7 +150,7 @@ async function validateOriginDirectory(originDir: string): Promise<void> {
     throw new Error("docs exists but is not a directory");
   }
 
-  console.log(`✅ docs directory exists`);
+  console.log(chalk.green(`✅ docs directory exists`));
 
   // Validate all JSON files in docs directory and subdirectories
   await validateJsonFilesInDirectory(docsPath);
@@ -88,7 +158,6 @@ async function validateOriginDirectory(originDir: string): Promise<void> {
 
 /**
  * Recursively validates all JSON files in a directory
- * @param {string} dirPath - The directory path to validate
  */
 async function validateJsonFilesInDirectory(dirPath: string): Promise<void> {
   const items = fs.readdirSync(dirPath);
@@ -106,7 +175,9 @@ async function validateJsonFilesInDirectory(dirPath: string): Promise<void> {
         const content = fs.readFileSync(itemPath, "utf8");
         JSON.parse(content);
         console.log(
-          `✅ Valid JSON file: ${path.relative(process.cwd(), itemPath)}`
+          chalk.green(
+            `✅ Valid JSON file: ${path.relative(process.cwd(), itemPath)}`
+          )
         );
       } catch (error) {
         throw new Error(
@@ -121,8 +192,6 @@ async function validateJsonFilesInDirectory(dirPath: string): Promise<void> {
 
 /**
  * Recursively copies a directory from source to destination
- * @param {string} src - Source directory path
- * @param {string} dest - Destination directory path
  */
 async function copyDirectory(src: string, dest: string): Promise<void> {
   const stat = fs.statSync(src);
@@ -156,8 +225,8 @@ async function copyDirectory(src: string, dest: string): Promise<void> {
     );
 
     if (isImageFile) {
-      // Copy image files to public directory (in docs app)
-      const publicDir = path.join(process.cwd(), "..", "docs", "public");
+      // Copy image files to public directory (in template)
+      const publicDir = path.join(path.dirname(dest), "..", "public");
       const fileName = path.basename(src);
       const publicDestPath = path.join(publicDir, fileName);
 
@@ -167,7 +236,9 @@ async function copyDirectory(src: string, dest: string): Promise<void> {
       }
 
       fs.copyFileSync(src, publicDestPath);
-      console.log(`📸 Copied image: ${fileName} to public directory`);
+      console.log(
+        chalk.blue(`📸 Copied image: ${fileName} to public directory`)
+      );
     } else {
       // Copy non-image files to content directory
       fs.copyFileSync(src, dest);
@@ -175,34 +246,258 @@ async function copyDirectory(src: string, dest: string): Promise<void> {
   }
 }
 
-// Main execution
-async function main(): Promise<void> {
-  const args = process.argv.slice(2);
+/**
+ * Runs npm install in the template directory
+ */
+async function installDependencies(templatePath: string): Promise<void> {
+  console.log(chalk.blue("📦 Installing dependencies..."));
 
-  if (args.length === 0) {
-    console.error(
-      "❌ Usage: node validate-and-copy-content.js <origin-directory>"
-    );
-    console.error(
-      "Example: node validate-and-copy-content.js ../../content-example"
-    );
-    process.exit(1);
+  try {
+    execSync("npm install", {
+      cwd: templatePath,
+      stdio: "inherit",
+    });
+    console.log(chalk.green("✅ Dependencies installed successfully"));
+  } catch (error) {
+    console.error(chalk.red("❌ Failed to install dependencies"));
+    throw error;
   }
-
-  const originDir = path.resolve(args[0]);
-  await validateAndCopyContent(originDir);
 }
 
-// Run the script only when executed directly (not imported)
-if (import.meta.url === `file://${process.argv[1]}`) {
-  main().catch((error) => {
-    console.error(
-      `❌ Script failed: ${
-        error instanceof Error ? error.message : String(error)
-      }`
-    );
+/**
+ * Runs npm run dev in the template directory
+ */
+function runDevMode(templatePath: string): void {
+  console.log(chalk.blue("🚀 Starting development server..."));
+
+  const devProcess = spawn("npm", ["run", "dev"], {
+    cwd: templatePath,
+    stdio: "inherit",
+    shell: true,
+  });
+
+  devProcess.on("error", (error) => {
+    console.error(chalk.red(`❌ Failed to start dev server: ${error.message}`));
     process.exit(1);
   });
+
+  devProcess.on("exit", (code) => {
+    if (code !== 0) {
+      console.error(chalk.red(`❌ Dev server exited with code ${code}`));
+      process.exit(1);
+    }
+  });
 }
+
+/**
+ * Watches the origin directory for changes and copies content when files change
+ */
+function watchOriginDirectory(originDir: string, templatePath: string): void {
+  console.log(chalk.blue(`👀 Watching for changes in: ${originDir}`));
+
+  const watcher = chokidar.watch(originDir, {
+    ignored: /(^|[\/\\])\../, // ignore dotfiles
+    persistent: true,
+  });
+
+  watcher.on("change", async (filePath: string) => {
+    console.log(
+      chalk.yellow(`📝 File changed: ${path.relative(originDir, filePath)}`)
+    );
+    try {
+      await validateAndCopyContent(originDir, templatePath);
+      console.log(chalk.green("✅ Content updated successfully"));
+    } catch (error) {
+      console.error(
+        chalk.red(
+          `❌ Error updating content: ${
+            error instanceof Error ? error.message : String(error)
+          }`
+        )
+      );
+    }
+  });
+
+  watcher.on("add", async (filePath: string) => {
+    console.log(
+      chalk.yellow(`➕ File added: ${path.relative(originDir, filePath)}`)
+    );
+    try {
+      await validateAndCopyContent(originDir, templatePath);
+      console.log(chalk.green("✅ Content updated successfully"));
+    } catch (error) {
+      console.error(
+        chalk.red(
+          `❌ Error updating content: ${
+            error instanceof Error ? error.message : String(error)
+          }`
+        )
+      );
+    }
+  });
+
+  watcher.on("unlink", async (filePath: string) => {
+    console.log(
+      chalk.yellow(`➖ File removed: ${path.relative(originDir, filePath)}`)
+    );
+    try {
+      await validateAndCopyContent(originDir, templatePath);
+      console.log(chalk.green("✅ Content updated successfully"));
+    } catch (error) {
+      console.error(
+        chalk.red(
+          `❌ Error updating content: ${
+            error instanceof Error ? error.message : String(error)
+          }`
+        )
+      );
+    }
+  });
+
+  // Handle process termination
+  process.on("SIGINT", () => {
+    console.log(chalk.yellow("\n🛑 Shutting down..."));
+    watcher.close();
+    process.exit(0);
+  });
+}
+
+/**
+ * Runs npm run build and copies the out directory to current directory
+ */
+async function buildAndCopyOutput(templatePath: string): Promise<void> {
+  console.log(chalk.blue("🔨 Building documentation..."));
+
+  try {
+    execSync("npm run build", {
+      cwd: templatePath,
+      stdio: "inherit",
+    });
+    console.log(chalk.green("✅ Build completed successfully"));
+
+    // Copy out directory to current directory
+    const outDir = path.join(templatePath, "out");
+    const currentDir = process.cwd();
+
+    if (!fs.existsSync(outDir)) {
+      throw new Error("Build output directory not found");
+    }
+
+    console.log(chalk.blue("📋 Copying build output to current directory..."));
+
+    // Create a safe output directory instead of overwriting current directory
+    const outputDir = path.join(currentDir, "docs-output");
+
+    // Remove existing output directory if it exists
+    if (fs.existsSync(outputDir)) {
+      fs.rmSync(outputDir, { recursive: true, force: true });
+    }
+
+    // Copy all contents from out directory to docs-output
+    const outContents = fs.readdirSync(outDir);
+    console.log(
+      chalk.blue(`📁 Found ${outContents.length} items in out directory`)
+    );
+
+    for (const item of outContents) {
+      const srcPath = path.join(outDir, item);
+      const destPath = path.join(outputDir, item);
+
+      try {
+        // Check if source exists and copy immediately
+        if (fs.existsSync(srcPath)) {
+          console.log(chalk.blue(`📋 Copying: ${item}`));
+          await copyDirectory(srcPath, destPath);
+        } else {
+          console.log(chalk.yellow(`⚠️  Skipping missing file: ${item}`));
+        }
+      } catch (error) {
+        console.log(
+          chalk.yellow(
+            `⚠️  Error copying ${item}: ${
+              error instanceof Error ? error.message : String(error)
+            }`
+          )
+        );
+        // Continue with other files
+      }
+    }
+
+    console.log(chalk.green("✅ Documentation built and copied successfully!"));
+    console.log(
+      chalk.green(
+        `🌐 Your documentation is ready in the 'docs-output' directory!`
+      )
+    );
+    console.log(chalk.blue(`📁 Output location: ${outputDir}`));
+  } catch (error) {
+    console.error(
+      chalk.red(
+        `❌ Build failed: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      )
+    );
+    throw error;
+  }
+}
+
+// CLI setup
+const program = new Command();
+
+program
+  .name("speed-docs")
+  .description("A CLI tool to create online documentation quickly")
+  .version("1.0.0");
+
+program
+  .argument(
+    "<origin-directory>",
+    "Path to the directory containing your content (config.json and docs/)"
+  )
+  .option("--dev", "Run in development mode with file watching")
+  .action(async (originDir: string, options: { dev?: boolean }) => {
+    try {
+      const resolvedOriginDir = path.resolve(originDir);
+
+      console.log(chalk.blue("🚀 Speed Docs CLI"));
+      console.log(chalk.blue("=================="));
+
+      // Download template
+      const templatePath = await downloadTemplate();
+
+      // Install dependencies
+      await installDependencies(templatePath);
+
+      // Copy content
+      await validateAndCopyContent(resolvedOriginDir, templatePath);
+
+      if (options.dev) {
+        // Development mode
+        console.log(chalk.green("🔧 Starting development mode..."));
+        console.log(chalk.yellow("Press Ctrl+C to stop"));
+
+        // Start file watching
+        watchOriginDirectory(resolvedOriginDir, templatePath);
+
+        // Start dev server
+        runDevMode(templatePath);
+      } else {
+        // Production mode
+        console.log(chalk.green("🏗️  Building for production..."));
+        await buildAndCopyOutput(templatePath);
+      }
+    } catch (error) {
+      console.error(
+        chalk.red(
+          `❌ Error: ${error instanceof Error ? error.message : String(error)}`
+        )
+      );
+      process.exit(1);
+    }
+  });
+
+// Parse command line arguments
+program.parse();
 
 export { validateAndCopyContent };

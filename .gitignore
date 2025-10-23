@@ -32,3 +32,6 @@ content/
 .turbo
 content-example/
 scripts/
+docs-output/
+
+apps/create-docs/public/
