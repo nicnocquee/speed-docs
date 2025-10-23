@@ -2,11 +2,13 @@
   "name": "docs",
   "version": "0.0.0",
   "private": true,
+  "type": "module",
   "scripts": {
     "build": "next build",
     "dev": "next dev",
     "start": "next start",
-    "postinstall": "fumadocs-mdx"
+    "postinstall": "fumadocs-mdx",
+    "validate-and-copy": "node scripts/validate-and-copy-content.js"
   },
   "dependencies": {
     "fumadocs-core": "15.5.5",

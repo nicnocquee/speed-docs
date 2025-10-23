@@ -1,5 +1,6 @@
-import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
-import Image from 'next/image';
+import type { BaseLayoutProps } from "fumadocs-ui/layouts/shared";
+import Image from "next/image";
+import config from "@/content/config.json";
 
 /**
  * Shared layout configurations
@@ -12,14 +13,16 @@ export const baseOptions: BaseLayoutProps = {
   nav: {
     title: (
       <>
-        <Image
-          src="/dataqueue-logo.png"
-          alt="DataQueue"
-          width={24}
-          height={24}
-          className="mr-2"
-        />
-        DataQueue
+        {config.nav.image && (
+          <Image
+            src={config.nav.image}
+            alt={config.nav.title}
+            width={24}
+            height={24}
+            className="mr-2"
+          />
+        )}
+        {config.nav.title || "config.nav.title"}
       </>
     ),
   },

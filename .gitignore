@@ -29,3 +29,5 @@ next-env.d.ts
 
 content/
 .turbo
+content-example/
+scripts/
