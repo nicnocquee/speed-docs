@@ -257,6 +257,10 @@ async function validateAndCopyContent(
     );
     await copyDirectory(originDir, contentDir);
 
+    // Step 5: Also copy image files to public directory
+    console.log(chalk.blue(`🖼️  Copying image files to public directory...`));
+    await copyImagesToPublic(originDir, templatePath);
+
     console.log(chalk.green(`✅ Successfully validated and copied content!`));
   } catch (error) {
     console.error(
@@ -265,6 +269,72 @@ async function validateAndCopyContent(
       )
     );
     throw error;
+  }
+}
+
+/**
+ * Copies image files from origin directory to template's public directory
+ */
+async function copyImagesToPublic(
+  originDir: string,
+  templatePath: string
+): Promise<void> {
+  // Common image file extensions
+  const imageExtensions = [
+    ".png",
+    ".jpg",
+    ".jpeg",
+    ".gif",
+    ".svg",
+    ".webp",
+    ".ico",
+    ".bmp",
+    ".tiff",
+    ".tif",
+  ];
+
+  // Ensure public directory exists
+  const publicDir = path.join(templatePath, "public");
+  if (!fs.existsSync(publicDir)) {
+    fs.mkdirSync(publicDir, { recursive: true });
+  }
+
+  // Recursively find and copy image files
+  await copyImagesRecursively(originDir, publicDir, imageExtensions);
+}
+
+/**
+ * Recursively finds and copies image files from source to public directory
+ */
+async function copyImagesRecursively(
+  srcDir: string,
+  publicDir: string,
+  imageExtensions: string[]
+): Promise<void> {
+  const items = fs.readdirSync(srcDir);
+
+  for (const item of items) {
+    const srcPath = path.join(srcDir, item);
+    const stat = fs.statSync(srcPath);
+
+    if (stat.isDirectory()) {
+      // Recursively process subdirectories
+      await copyImagesRecursively(srcPath, publicDir, imageExtensions);
+    } else {
+      // Check if this is an image file
+      const ext = path.extname(srcPath).toLowerCase();
+      const isImage = imageExtensions.includes(ext);
+
+      if (isImage) {
+        const fileName = path.basename(srcPath);
+        const publicDestPath = path.join(publicDir, fileName);
+
+        console.log(
+          chalk.blue(`🖼️  Copying image: ${fileName} to public directory`)
+        );
+        fs.copyFileSync(srcPath, publicDestPath);
+      }
+    }
   }
 }
 
