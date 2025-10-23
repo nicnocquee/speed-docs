@@ -25,6 +25,134 @@ const TEMPLATE_REPO_URL =
   "https://github.com/nicnocquee/speed-docs/archive/refs/heads/main.tar.gz";
 const TEMPLATE_SUBDIR = "speed-docs-main/apps/template-fumadocs-static";
 
+// Cache directory for templates
+const CACHE_DIR = path.join(os.homedir(), ".speed-docs", "cache");
+const TEMPLATE_CACHE_DIR = path.join(CACHE_DIR, "template");
+
+/**
+ * Checks if a cached template exists and is valid
+ */
+function isTemplateCached(): boolean {
+  if (!fs.existsSync(TEMPLATE_CACHE_DIR)) {
+    return false;
+  }
+
+  // Check if essential template files exist
+  const essentialFiles = [
+    "package.json",
+    "next.config.mjs",
+    "app/layout.tsx",
+    "app/(docs)/layout.tsx",
+  ];
+
+  for (const file of essentialFiles) {
+    if (!fs.existsSync(path.join(TEMPLATE_CACHE_DIR, file))) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+/**
+ * Ensures cache directory exists
+ */
+function ensureCacheDirectory(): void {
+  if (!fs.existsSync(CACHE_DIR)) {
+    fs.mkdirSync(CACHE_DIR, { recursive: true });
+  }
+}
+
+/**
+ * Downloads the template from GitHub to cache directory
+ */
+async function downloadTemplateToCache(templateUrl?: string): Promise<string> {
+  ensureCacheDirectory();
+
+  const repoUrl = templateUrl || TEMPLATE_REPO_URL;
+  console.log(chalk.blue(`📥 Downloading template from: ${repoUrl}`));
+
+  const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "speed-docs-"));
+  const tarPath = path.join(tmpDir, "template.tar.gz");
+
+  try {
+    const response = await fetch(repoUrl);
+    if (!response.ok) {
+      throw new Error(`Failed to download template: ${response.statusText}`);
+    }
+
+    const buffer = await response.arrayBuffer();
+    fs.writeFileSync(tarPath, Buffer.from(buffer));
+
+    console.log(chalk.green("✅ Template downloaded successfully"));
+
+    // Extract the tar file
+    console.log(chalk.blue("📦 Extracting template..."));
+    await tar.extract({
+      file: tarPath,
+      cwd: tmpDir,
+    });
+
+    const extractedTemplatePath = path.join(tmpDir, TEMPLATE_SUBDIR);
+    if (!fs.existsSync(extractedTemplatePath)) {
+      throw new Error(
+        "Template extraction failed - template directory not found"
+      );
+    }
+
+    // Remove existing cache if it exists
+    if (fs.existsSync(TEMPLATE_CACHE_DIR)) {
+      fs.rmSync(TEMPLATE_CACHE_DIR, { recursive: true, force: true });
+    }
+
+    // Copy to cache directory
+    fs.mkdirSync(TEMPLATE_CACHE_DIR, { recursive: true });
+    await copyDirectory(extractedTemplatePath, TEMPLATE_CACHE_DIR);
+
+    console.log(chalk.green("✅ Template cached successfully"));
+
+    // Clean up temporary files
+    fs.rmSync(tmpDir, { recursive: true, force: true });
+
+    return TEMPLATE_CACHE_DIR;
+  } catch (error) {
+    // Clean up temporary files on error
+    if (fs.existsSync(tmpDir)) {
+      fs.rmSync(tmpDir, { recursive: true, force: true });
+    }
+
+    console.error(
+      chalk.red(
+        `❌ Error downloading template: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      )
+    );
+    throw error;
+  }
+}
+
+/**
+ * Gets template path - either from cache or downloads it
+ */
+async function getTemplatePath(
+  templateUrl?: string,
+  forceDownload = false
+): Promise<string> {
+  if (!forceDownload && isTemplateCached()) {
+    console.log(chalk.green("✅ Using cached template"));
+    return TEMPLATE_CACHE_DIR;
+  }
+
+  if (forceDownload) {
+    console.log(chalk.yellow("🔄 Force downloading template..."));
+  } else {
+    console.log(chalk.blue("📥 Template not cached, downloading..."));
+  }
+
+  return await downloadTemplateToCache(templateUrl);
+}
+
 /**
  * Downloads the template from GitHub to a temporary directory
  */
@@ -469,10 +597,11 @@ program
   )
   .option("--dev", "Run in development mode with file watching")
   .option("--template <url>", "Override the default template repository URL")
+  .option("--force", "Force redownload and reinstall template (ignores cache)")
   .action(
     async (
       originDir: string,
-      options: { dev?: boolean; template?: string }
+      options: { dev?: boolean; template?: string; force?: boolean }
     ) => {
       try {
         const resolvedOriginDir = path.resolve(originDir);
@@ -480,8 +609,11 @@ program
         console.log(chalk.blue("🚀 Speed Docs CLI"));
         console.log(chalk.blue("=================="));
 
-        // Download template
-        const templatePath = await downloadTemplate(options.template);
+        // Get template path (from cache or download)
+        const templatePath = await getTemplatePath(
+          options.template,
+          options.force
+        );
 
         // Install dependencies
         await installDependencies(templatePath);
