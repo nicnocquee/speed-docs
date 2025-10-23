@@ -67,18 +67,21 @@ jobs:
 
       - name: Create Action Archive
         run: |
-          cd apps/speed-docs-github-action
-
           # Create a clean directory for the action
-          mkdir -p ../action-release
-          cp action.yml ../action-release/
-          cp README.md ../action-release/
-          cp package.json ../action-release/
-          cp -r dist/ ../action-release/
+          mkdir -p /tmp/action-release
+
+          # Copy files to temp directory
+          cp apps/speed-docs-github-action/action.yml /tmp/action-release/
+          cp apps/speed-docs-github-action/README.md /tmp/action-release/
+          cp apps/speed-docs-github-action/package.json /tmp/action-release/
+          cp -r apps/speed-docs-github-action/dist/ /tmp/action-release/
 
           # Create archive
-          cd ../action-release
-          tar -czf ../speed-docs-github-action.tar.gz *
+          cd /tmp/action-release
+          tar -czf /tmp/speed-docs-github-action.tar.gz *
+
+          # Verify archive was created
+          ls -la /tmp/speed-docs-github-action.tar.gz
 
       - name: Upload Action Archive
         uses: actions/upload-release-asset@v1
@@ -86,6 +89,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ github.event.release.upload_url }}
-          asset_path: ./speed-docs-github-action.tar.gz
+          asset_path: /tmp/speed-docs-github-action.tar.gz
           asset_name: speed-docs-github-action.tar.gz
           asset_content_type: application/gzip
