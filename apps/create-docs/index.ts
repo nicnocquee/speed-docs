@@ -7,7 +7,7 @@ import path from "path";
  * Validates and copies content from origin directory to content directory
  * @param {string} originDir - The origin directory path
  */
-async function validateAndCopyContent(originDir) {
+async function validateAndCopyContent(originDir: string): Promise<void> {
   try {
     console.log(`🔍 Validating and copying content from: ${originDir}`);
 
@@ -38,7 +38,9 @@ async function validateAndCopyContent(originDir) {
 
     console.log(`✅ Successfully validated and copied content!`);
   } catch (error) {
-    console.error(`❌ Error: ${error.message}`);
+    console.error(
+      `❌ Error: ${error instanceof Error ? error.message : String(error)}`
+    );
     process.exit(1);
   }
 }
@@ -47,7 +49,7 @@ async function validateAndCopyContent(originDir) {
  * Validates the origin directory structure and content
  * @param {string} originDir - The origin directory path
  */
-async function validateOriginDirectory(originDir) {
+async function validateOriginDirectory(originDir: string): Promise<void> {
   console.log(`🔍 Validating origin directory structure...`);
 
   // Check if config.json exists and is valid JSON
@@ -61,7 +63,11 @@ async function validateOriginDirectory(originDir) {
     JSON.parse(configContent);
     console.log(`✅ config.json is valid JSON`);
   } catch (error) {
-    throw new Error(`config.json is not valid JSON: ${error.message}`);
+    throw new Error(
+      `config.json is not valid JSON: ${
+        error instanceof Error ? error.message : String(error)
+      }`
+    );
   }
 
   // Check if docs directory exists
@@ -84,7 +90,7 @@ async function validateOriginDirectory(originDir) {
  * Recursively validates all JSON files in a directory
  * @param {string} dirPath - The directory path to validate
  */
-async function validateJsonFilesInDirectory(dirPath) {
+async function validateJsonFilesInDirectory(dirPath: string): Promise<void> {
   const items = fs.readdirSync(dirPath);
 
   for (const item of items) {
@@ -103,7 +109,11 @@ async function validateJsonFilesInDirectory(dirPath) {
           `✅ Valid JSON file: ${path.relative(process.cwd(), itemPath)}`
         );
       } catch (error) {
-        throw new Error(`Invalid JSON file ${itemPath}: ${error.message}`);
+        throw new Error(
+          `Invalid JSON file ${itemPath}: ${
+            error instanceof Error ? error.message : String(error)
+          }`
+        );
       }
     }
   }
@@ -114,7 +124,7 @@ async function validateJsonFilesInDirectory(dirPath) {
  * @param {string} src - Source directory path
  * @param {string} dest - Destination directory path
  */
-async function copyDirectory(src, dest) {
+async function copyDirectory(src: string, dest: string): Promise<void> {
   const stat = fs.statSync(src);
 
   if (stat.isDirectory()) {
@@ -166,7 +176,7 @@ async function copyDirectory(src, dest) {
 }
 
 // Main execution
-async function main() {
+async function main(): Promise<void> {
   const args = process.argv.slice(2);
 
   if (args.length === 0) {
@@ -186,7 +196,11 @@ async function main() {
 // Run the script only when executed directly (not imported)
 if (import.meta.url === `file://${process.argv[1]}`) {
   main().catch((error) => {
-    console.error(`❌ Script failed: ${error.message}`);
+    console.error(
+      `❌ Script failed: ${
+        error instanceof Error ? error.message : String(error)
+      }`
+    );
     process.exit(1);
   });
 }

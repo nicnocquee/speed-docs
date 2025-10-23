@@ -1,13 +1,38 @@
 {
-  "name": "create-docs",
-  "version": "0.0.0",
-  "private": true,
-  "type": "module",
-  "scripts": {
-    "start": "node index.js"
+  "name": "create-fumadocs",
+  "version": "1.0.0",
+  "description": "A CLI tool to create and validate FumaDocs content structure",
+  "main": "dist/index.js",
+  "bin": {
+    "create-fumadocs": "./dist/index.js"
   },
+  "type": "module",
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "tsc --watch",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "fumadocs",
+    "docs",
+    "documentation",
+    "cli",
+    "content",
+    "validation"
+  ],
+  "author": "",
+  "license": "MIT",
   "dependencies": {},
   "devDependencies": {
-    "@types/node": "24.0.3"
+    "@types/node": "^24.0.3",
+    "typescript": "^5.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
   }
 }

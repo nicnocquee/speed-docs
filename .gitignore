@@ -10,7 +10,8 @@ node_modules/
 coverage
 .next/
 out/
-build
+build/
+dist/
 *.tsbuildinfo
 
 # misc
