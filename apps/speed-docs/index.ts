@@ -9,10 +9,15 @@ import { Command } from "commander";
 import fetch from "node-fetch";
 import tar from "tar";
 import chokidar from "chokidar";
+import { fileURLToPath } from "url";
 
-// Read version from package.json
+// Get __dirname equivalent for ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Read version from package.json (go up one level from dist to find package.json)
 const packageJson = JSON.parse(
-  fs.readFileSync(path.join(__dirname, "package.json"), "utf8")
+  fs.readFileSync(path.join(__dirname, "..", "package.json"), "utf8")
 );
 const version = packageJson.version;
 
