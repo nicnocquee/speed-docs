@@ -10,6 +10,36 @@ npm install -g speed-docs
 
 ## Usage
 
+### Prepare your content directory
+
+Your content directory should have this structure:
+
+```
+content/
+├── config.json          # Documentation configuration
+└── docs/                # Your documentation content
+    ├── index.mdx
+    ├── getting-started/
+    │   ├── meta.json
+    │   └── content.mdx
+    └── api/
+        ├── meta.json
+        └── reference.mdx
+```
+
+The config.json file should contain your documentation configuration:
+
+```json
+{
+  "nav": {
+    "title": "My Documentation",
+    "image": "/logo.png"
+  }
+}
+```
+
+Put the images in the root of content directory. In the example above, put the images in `content` directory.
+
 ### Basic Usage
 
 ```bash
@@ -92,22 +122,6 @@ Speed-docs automates the entire documentation creation process:
 - Builds optimized static documentation
 - Outputs the built documentation to a `docs-output` directory
 - Ready for deployment to any static hosting service
-
-## Directory Structure
-
-Your origin directory should have this structure:
-
-```
-my-content/
-├── config.json          # Documentation configuration
-└── docs/                # Your documentation content
-    ├── getting-started/
-    │   ├── page.json
-    │   └── content.md
-    └── api/
-        ├── page.json
-        └── reference.md
-```
 
 ## Command Line Options
 

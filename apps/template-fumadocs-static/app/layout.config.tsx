@@ -15,7 +15,7 @@ export const baseOptions: BaseLayoutProps = {
       <>
         {config.nav.image && (
           <Image
-            src={config.nav.image}
+            src={process.env.PAGES_BASE_PATH + config.nav.image}
             alt={config.nav.title}
             width={24}
             height={24}
