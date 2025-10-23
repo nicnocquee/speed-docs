@@ -1,0 +1,80 @@
+name: Pre-Release Validation
+
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  validate-release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Extract version from tag
+        id: version
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/v}
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Release version: $VERSION"
+
+      - name: Check package.json version
+        run: |
+          cd apps/speed-docs-github-action
+          PACKAGE_VERSION=$(node -p "require('./package.json').version")
+          RELEASE_VERSION="${{ steps.version.outputs.version }}"
+
+          echo "Package.json version: $PACKAGE_VERSION"
+          echo "Release tag version: $RELEASE_VERSION"
+
+          if [ "$PACKAGE_VERSION" != "$RELEASE_VERSION" ]; then
+            echo "⚠️  Version mismatch detected!"
+            echo "The package.json version ($PACKAGE_VERSION) doesn't match the release tag ($RELEASE_VERSION)"
+            echo "This will be automatically fixed when the release is published."
+          else
+            echo "✅ Version already synchronized"
+          fi
+
+      - name: Validate action.yml
+        run: |
+          cd apps/speed-docs-github-action
+
+          # Check if action.yml exists and is valid
+          if [ ! -f "action.yml" ]; then
+            echo "❌ action.yml not found"
+            exit 1
+          fi
+
+          # Basic validation
+          if ! grep -q "name:" action.yml; then
+            echo "❌ action.yml missing name field"
+            exit 1
+          fi
+
+          if ! grep -q "runs:" action.yml; then
+            echo "❌ action.yml missing runs field"
+            exit 1
+          fi
+
+          echo "✅ action.yml validation passed"
+
+      - name: Check build readiness
+        run: |
+          cd apps/speed-docs-github-action
+
+          # Check if dist directory exists or can be built
+          if [ ! -d "dist" ]; then
+            echo "ℹ️  dist directory not found, will be built during release"
+          else
+            echo "✅ dist directory exists"
+          fi
+
+          # Check package.json
+          if [ ! -f "package.json" ]; then
+            echo "❌ package.json not found"
+            exit 1
+          fi
+
+          echo "✅ Pre-release validation completed"

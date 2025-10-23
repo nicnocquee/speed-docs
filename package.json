@@ -9,7 +9,8 @@
     "dev": "turbo dev",
     "start": "turbo start",
     "lint": "turbo lint",
-    "type-check": "turbo type-check"
+    "type-check": "turbo type-check",
+    "release-action": "./scripts/release-action.sh"
   },
   "dependencies": {},
   "devDependencies": {

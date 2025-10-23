@@ -1,0 +1,73 @@
+name: Release Action
+
+on:
+  workflow_run:
+    workflows: ["Auto-Update Action Version"]
+    types: [completed]
+    branches: [main]
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: "apps/speed-docs-github-action/package-lock.json"
+
+      - name: Verify version matches release
+        run: |
+          cd apps/speed-docs-github-action
+          PACKAGE_VERSION=$(node -p "require('./package.json').version")
+
+          # Get the latest release tag
+          LATEST_TAG=$(git describe --tags --abbrev=0)
+          RELEASE_VERSION=${LATEST_TAG#v}
+
+          echo "Package version: $PACKAGE_VERSION"
+          echo "Release version: $RELEASE_VERSION"
+
+          if [ "$PACKAGE_VERSION" = "$RELEASE_VERSION" ]; then
+            echo "✅ Version verification successful"
+          else
+            echo "❌ Version mismatch: package.json has $PACKAGE_VERSION but release is $RELEASE_VERSION"
+            exit 1
+          fi
+
+      - name: Install dependencies
+        run: |
+          cd apps/speed-docs-github-action
+          npm ci
+
+      - name: Build
+        run: |
+          cd apps/speed-docs-github-action
+          npm run build
+
+      - name: Create Release Asset
+        run: |
+          cd apps/speed-docs-github-action
+          tar -czf ../speed-docs-github-action-${{ github.event.release.tag_name }}.tar.gz \
+            action.yml \
+            dist/ \
+            README.md \
+            package.json
+
+      - name: Upload Release Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: ./speed-docs-github-action-${{ github.event.release.tag_name }}.tar.gz
+          asset_name: speed-docs-github-action-${{ github.event.release.tag_name }}.tar.gz
+          asset_content_type: application/gzip
