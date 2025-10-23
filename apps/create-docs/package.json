@@ -1,10 +1,10 @@
 {
-  "name": "create-fumadocs",
+  "name": "create-docs",
   "version": "1.0.0",
   "description": "A CLI tool to create and validate FumaDocs content structure",
   "main": "dist/index.js",
   "bin": {
-    "create-fumadocs": "./dist/index.js"
+    "create-docs": "./dist/index.js"
   },
   "type": "module",
   "files": [
