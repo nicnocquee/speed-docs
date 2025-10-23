@@ -1,23 +1,23 @@
-# create-fumadocs
+# speed-docs
 
 A CLI tool to create and validate FumaDocs content structure.
 
 ## Installation
 
 ```bash
-npm install -g create-fumadocs
+npm install -g speed-docs
 ```
 
 ## Usage
 
 ```bash
-create-fumadocs <origin-directory>
+speed-docs <origin-directory>
 ```
 
 ### Example
 
 ```bash
-create-fumadocs ./content-example
+speed-docs ./content-example
 ```
 
 ## What it does
