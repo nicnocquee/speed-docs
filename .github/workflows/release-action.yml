@@ -6,6 +6,10 @@ on:
     paths:
       - "apps/speed-docs-github-action/**"
 
+permissions:
+  contents: write
+  actions: read
+
 jobs:
   release:
     runs-on: ubuntu-latest
@@ -84,11 +88,7 @@ jobs:
           ls -la /tmp/speed-docs-github-action.tar.gz
 
       - name: Upload Action Archive
-        uses: actions/upload-release-asset@v1
+        run: |
+          gh release upload ${{ github.event.release.tag_name }} /tmp/speed-docs-github-action.tar.gz
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ github.event.release.upload_url }}
-          asset_path: /tmp/speed-docs-github-action.tar.gz
-          asset_name: speed-docs-github-action.tar.gz
-          asset_content_type: application/gzip
