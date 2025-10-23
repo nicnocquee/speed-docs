@@ -8,7 +8,7 @@ The GitHub Action is **fully automated** for publishing. You only need to create
 
 1. **Version Sync**: `package.json` version is automatically updated to match the release tag
 2. **Build & Publish**: The action is automatically built and published
-3. **Availability**: The action becomes available as `nicnocquee/speed-docs@vX.X.X/apps/speed-docs-github-action`
+3. **Availability**: The action becomes available as `ACTION_REPO_URL@vX.X.X` in the separate repository
 
 ## Quick Start (Automated)
 
@@ -24,8 +24,8 @@ The GitHub Action is **fully automated** for publishing. You only need to create
 
 2. **Everything else is automatic**:
    - ✅ Version automatically updated in `package.json`
-   - ✅ Action built and published
-   - ✅ Available as `nicnocquee/speed-docs@vX.X.X/apps/speed-docs-github-action`
+   - ✅ Action built and published to separate repository
+   - ✅ Available as `ACTION_REPO_URL@vX.X.X`
 
 ### Using the Helper Script
 
@@ -34,6 +34,37 @@ npm run release-action
 ```
 
 This script provides guidance and can optionally update the version manually.
+
+## Setup
+
+Before publishing, you need to configure the action repository URL:
+
+### 1. Create the Action Repository
+
+Create a new repository for your GitHub Action (e.g., `nicnocquee/speed-docs-github-action`).
+
+### 2. Configure Repository Variable
+
+Run the setup script to configure the repository variable:
+
+```bash
+./scripts/setup-action-repo.sh
+```
+
+This script will:
+
+- Prompt you for the action repository URL
+- Validate the repository exists
+- Set the `ACTION_REPO_URL` variable in your repository settings
+
+### 3. Manual Setup (Alternative)
+
+If you prefer to set up manually:
+
+1. Go to your repository settings → Variables and secrets → Actions
+2. Add a new repository variable:
+   - Name: `ACTION_REPO_URL`
+   - Value: `your-username/your-action-repo` (e.g., `nicnocquee/speed-docs-github-action`)
 
 ## Automated Workflows
 

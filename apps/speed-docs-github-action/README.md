@@ -16,7 +16,7 @@ A GitHub Action that builds documentation using the [speed-docs](https://github.
 
 ### Published Action (Recommended)
 
-Use the published action from GitHub:
+Use the published action from the dedicated repository:
 
 ```yaml
 name: Deploy Documentation
@@ -32,11 +32,13 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Deploy docs to GitHub Pages
-        uses: nicnocquee/speed-docs@v0.0.10/apps/speed-docs-github-action
+        uses: nicnocquee/speed-docs-github-action@v0.0.10
         with:
           content-path: "./docs"
           github-token: ${{ secrets.GITHUB_TOKEN }}
 ```
+
+> **Note**: The action is automatically published to a separate repository when releases are created in this monorepo.
 
 ### Local Development
 
@@ -78,7 +80,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Deploy docs to GitHub Pages
-        uses: nicnocquee/speed-docs@v0.0.10/apps/speed-docs-github-action
+        uses: nicnocquee/speed-docs-github-action@v0.0.10
         with:
           content-path: "./docs"
           github-token: ${{ secrets.GITHUB_TOKEN }}

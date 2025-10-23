@@ -9,6 +9,7 @@ on:
 permissions:
   contents: write
   actions: read
+  packages: read
 
 jobs:
   release:
@@ -69,13 +70,35 @@ jobs:
           cd apps/speed-docs-github-action
           npm run build
 
-      - name: Verify Action Structure
+      - name: Push Action to Separate Repository
         run: |
-          echo "✅ Action is ready for use from monorepo"
-          echo "Users can now reference: nicnocquee/speed-docs@${{ github.event.release.tag_name }}/apps/speed-docs-github-action"
-          echo ""
-          echo "Action files:"
-          ls -la apps/speed-docs-github-action/
-          echo ""
-          echo "Built files:"
-          ls -la apps/speed-docs-github-action/dist/
+          # Set up git config
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+
+          # Create a temporary directory for the action repository
+          mkdir -p /tmp/action-repo
+          cd /tmp/action-repo
+
+          # Clone the action repository
+          git clone https://github.com/${{ vars.ACTION_REPO_URL }}.git .
+
+          # Remove all existing files except .git
+          find . -not -path './.git*' -delete
+
+          # Copy action files from monorepo
+          cp ${{ github.workspace }}/apps/speed-docs-github-action/action.yml .
+          cp ${{ github.workspace }}/apps/speed-docs-github-action/README.md .
+          cp ${{ github.workspace }}/apps/speed-docs-github-action/package.json .
+          cp -r ${{ github.workspace }}/apps/speed-docs-github-action/dist/ .
+
+          # Commit and push changes
+          git add .
+          git commit -m "Release ${{ github.event.release.tag_name }}"
+          git tag ${{ github.event.release.tag_name }}
+          git push origin main
+          git push origin ${{ github.event.release.tag_name }}
+
+          echo "✅ Action published to ${{ vars.ACTION_REPO_URL }}@${{ github.event.release.tag_name }}"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
