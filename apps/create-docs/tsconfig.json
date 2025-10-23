@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "target": "ESNext",
-    "lib": ["dom", "dom.iterable", "esnext"],
+    "lib": ["esnext"],
     "allowJs": true,
     "skipLibCheck": true,
     "strict": true,
@@ -12,17 +12,9 @@
     "moduleResolution": "bundler",
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "jsx": "preserve",
-    "incremental": true
+    "incremental": true,
+    "composite": true
   },
-  "include": [],
-  "exclude": ["node_modules"],
-  "references": [
-    {
-      "path": "./apps/docs"
-    },
-    {
-      "path": "./apps/validate-content"
-    }
-  ]
+  "include": ["**/*.ts", "**/*.js"],
+  "exclude": ["node_modules"]
 }

@@ -1,0 +1,13 @@
+{
+  "name": "create-docs",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@types/node": "24.0.3"
+  }
+}

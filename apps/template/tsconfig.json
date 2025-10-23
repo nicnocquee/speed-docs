@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "baseUrl": ".",
     "target": "ESNext",
     "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
@@ -13,16 +14,18 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "jsx": "preserve",
-    "incremental": true
-  },
-  "include": [],
-  "exclude": ["node_modules"],
-  "references": [
-    {
-      "path": "./apps/docs"
+    "incremental": true,
+    "composite": true,
+    "paths": {
+      "@/.source": ["./.source/index.ts"],
+      "@/*": ["./*"]
     },
-    {
-      "path": "./apps/validate-content"
-    }
-  ]
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ]
+  },
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
+  "exclude": ["node_modules"]
 }
