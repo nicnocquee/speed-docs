@@ -10,6 +10,12 @@ import fetch from "node-fetch";
 import tar from "tar";
 import chokidar from "chokidar";
 
+// Read version from package.json
+const packageJson = JSON.parse(
+  fs.readFileSync(path.join(__dirname, "package.json"), "utf8")
+);
+const version = packageJson.version;
+
 const TEMPLATE_REPO_URL =
   "https://github.com/nicnocquee/speed-docs/archive/refs/heads/main.tar.gz";
 const TEMPLATE_SUBDIR = "speed-docs-main/apps/template-fumadocs-static";
@@ -449,7 +455,7 @@ const program = new Command();
 program
   .name("speed-docs")
   .description("A CLI tool to create online documentation quickly")
-  .version("1.0.0");
+  .version(version);
 
 program
   .argument(
