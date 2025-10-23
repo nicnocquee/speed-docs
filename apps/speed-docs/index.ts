@@ -517,13 +517,19 @@ function watchOriginDirectory(originDir: string, templatePath: string): void {
 /**
  * Runs npm run build and copies the out directory to current directory
  */
-async function buildAndCopyOutput(templatePath: string): Promise<void> {
+async function buildAndCopyOutput(
+  templatePath: string,
+  basePath: string = "/"
+): Promise<void> {
   console.log(chalk.blue("🔨 Building documentation..."));
 
   try {
     execSync("npm run build", {
       cwd: templatePath,
       stdio: "inherit",
+      env: {
+        PAGES_BASE_PATH: basePath,
+      },
     });
     console.log(chalk.green("✅ Build completed successfully"));
 
@@ -614,6 +620,7 @@ program
     "--download-dir <path>",
     "Override the default download/cache directory"
   )
+  .option("--base-path <path>", "Override the default base path")
   .action(
     async (
       originDir: string,
@@ -622,6 +629,7 @@ program
         template?: string;
         force?: boolean;
         downloadDir?: string;
+        basePath?: string;
       }
     ) => {
       try {
@@ -673,7 +681,7 @@ program
         } else {
           // Production mode
           console.log(chalk.green("🏗️  Building for production..."));
-          await buildAndCopyOutput(templatePath);
+          await buildAndCopyOutput(templatePath, options.basePath || "/");
         }
       } catch (error) {
         console.error(
