@@ -1,6 +1,29 @@
 import type { BaseLayoutProps } from "fumadocs-ui/layouts/shared";
 import Image from "next/image";
-import config from "@/content/config.json";
+import contentConfig from "@/content/config.json";
+
+/**
+ * Parse the content configuration
+ * @param config - The content configuration
+ * @returns The parsed configuration
+ */
+const parseConfig = (
+  config: any
+): {
+  nav: {
+    title: string;
+    image?: string;
+  };
+} => {
+  const theConfig = config;
+  if ("image" in config.nav && config.nav.image) {
+    const prefix = process.env.PAGES_BASE_PATH || "";
+    theConfig.nav.image = prefix + config.nav.image;
+  }
+  return theConfig;
+};
+
+const config = parseConfig(contentConfig);
 
 /**
  * Shared layout configurations
@@ -15,7 +38,7 @@ export const baseOptions: BaseLayoutProps = {
       <>
         {config.nav.image && (
           <Image
-            src={process.env.PAGES_BASE_PATH + config.nav.image}
+            src={config.nav.image}
             alt={config.nav.title}
             width={24}
             height={24}
