@@ -535,6 +535,11 @@ async function copyDirectory(
       await copyDirectory(srcPath, destPath, includeHidden);
     }
   } else {
+    // Ensure destination directory exists before copying file
+    const destDir = path.dirname(dest);
+    if (!fs.existsSync(destDir)) {
+      fs.mkdirSync(destDir, { recursive: true });
+    }
     // Copy all files directly to destination
     fs.copyFileSync(src, dest);
   }
