@@ -1,0 +1,25 @@
+---
+title: Deploy
+---
+
+You can deploy your documentation to any static hosting service. After running
+
+```bash
+speed-docs <origin-directory>
+```
+
+your documentation will be built and copied to the `docs-output` directory. You can then deploy the `docs-output` directory to any static hosting service.
+
+## Local preview
+
+If you want to see the built documentation on your computer, you can run:
+
+```bash
+npx serve@latest docs-output
+```
+
+and open [http://localhost:5173](http://localhost:5173) in your browser. Repalce the port number with whatever port that `serve` is using.
+
+## GitHub Pages
+
+You can deploy your documentation to GitHub Pages by using the [Speed Docs GitHub Action](https://github.com/nicnocquee/speed-docs-github-action).

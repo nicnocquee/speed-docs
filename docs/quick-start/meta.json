@@ -1,0 +1,6 @@
+{
+  "title": "Introduction",
+  "icon": "MyIcon",
+  "pages": ["how-it-works", "preparing-your-content", "deploy"],
+  "defaultOpen": true
+}

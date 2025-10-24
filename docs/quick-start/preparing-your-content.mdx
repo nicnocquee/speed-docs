@@ -1,0 +1,66 @@
+---
+title: Preparing your content
+---
+
+## Content structure
+
+Your content directory should have:
+
+- A `config.json` file.
+- A `docs` directory to store your markdown files and metadata files.
+
+and structured like this:
+
+```
+content/
+├── config.json          # Documentation configuration
+└── docs/                # Your documentation content
+    ├── index.mdx
+    ├── ...
+    ├── getting-started/
+    │   ├── meta.json
+    │   └── content.mdx
+    ├── ...
+    └── api/
+        ├── meta.json
+        └── reference.mdx
+        ├── ...
+```
+
+The config.json file should contain your documentation configuration:
+
+```json
+{
+  "nav": {
+    "title": "My Documentation",
+    "image": "/logo.png"
+  }
+}
+```
+
+<Callout type="warn">
+  The `image` is optional. But if you set a value, it has to be prefixed with
+  `/`.
+</Callout>
+
+## Images
+
+Put the images in the root of content directory. In the example above, put the images in `content` directory. You can then reference the images in your markdown files using the name prefixed with `/`. For example, if you have an image named `logo.png` in the `content` directory, you can reference it in your markdown files using `/logo.png`.
+
+## Metadata
+
+Each directory in the `docs` directory can have a `meta.json` file. This file is used to define the navigation of the page.
+
+```json
+{
+  "title": "Introduction",
+  "icon": "MyIcon",
+  "pages": ["how-it-works", "preparing-your-content", "deploy"]
+}
+```
+
+For more information, see [the Page Convention documentation in Fumadocs](https://fumadocs.dev/docs/ui/page-conventions#meta).
+
+## Example
+
+See the [docs](https://github.com/nicnocquee/speed-docs/tree/main/docs) directory of the Speed Docs repository for an example.
