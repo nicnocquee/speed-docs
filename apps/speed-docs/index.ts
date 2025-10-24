@@ -261,6 +261,12 @@ async function validateAndCopyContent(
     console.log(chalk.blue(`🖼️  Copying image files to public directory...`));
     await copyImagesToPublic(originDir, templatePath);
 
+    // Step 6: Copy all other non-hidden files and folders to public directory
+    console.log(
+      chalk.blue(`📁 Copying other files and folders to public directory...`)
+    );
+    await copyOtherFilesToPublic(originDir, templatePath);
+
     console.log(chalk.green(`✅ Successfully validated and copied content!`));
   } catch (error) {
     console.error(
@@ -334,6 +340,69 @@ async function copyImagesRecursively(
         );
         fs.copyFileSync(srcPath, publicDestPath);
       }
+    }
+  }
+}
+
+/**
+ * Copies all other non-hidden files and folders (excluding 'dir' directory and 'config.json') to public directory
+ */
+async function copyOtherFilesToPublic(
+  originDir: string,
+  templatePath: string
+): Promise<void> {
+  // Ensure public directory exists
+  const publicDir = path.join(templatePath, "public");
+  if (!fs.existsSync(publicDir)) {
+    fs.mkdirSync(publicDir, { recursive: true });
+  }
+
+  // Recursively find and copy other files and folders
+  await copyOtherFilesRecursively(originDir, publicDir);
+}
+
+/**
+ * Recursively finds and copies other files and folders from source to public directory
+ * Excludes hidden files/folders, 'dir' directory, and 'config.json'
+ */
+async function copyOtherFilesRecursively(
+  srcDir: string,
+  publicDir: string
+): Promise<void> {
+  const items = fs.readdirSync(srcDir);
+
+  for (const item of items) {
+    // Skip hidden files and folders (starting with .)
+    if (item.startsWith(".")) {
+      continue;
+    }
+
+    // Skip 'dir' directory and 'config.json'
+    if (item === "dir" || item === "config.json") {
+      continue;
+    }
+
+    const srcPath = path.join(srcDir, item);
+    const stat = fs.statSync(srcPath);
+
+    if (stat.isDirectory()) {
+      // Create corresponding directory in public folder
+      const destDir = path.join(publicDir, item);
+      if (!fs.existsSync(destDir)) {
+        fs.mkdirSync(destDir, { recursive: true });
+      }
+
+      // Recursively process subdirectories
+      await copyOtherFilesRecursively(srcPath, destDir);
+    } else {
+      // Copy file to public directory
+      const fileName = path.basename(srcPath);
+      const publicDestPath = path.join(publicDir, fileName);
+
+      console.log(
+        chalk.blue(`📄 Copying file: ${fileName} to public directory`)
+      );
+      fs.copyFileSync(srcPath, publicDestPath);
     }
   }
 }
