@@ -1,5 +1,5 @@
 {
-  "title": "Introduction",
+  "title": "Guide",
   "icon": "MyIcon",
   "pages": ["how-it-works", "preparing-your-content", "deploy"],
   "defaultOpen": true
