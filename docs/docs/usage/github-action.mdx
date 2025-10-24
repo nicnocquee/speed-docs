@@ -30,5 +30,5 @@ jobs:
         with:
           content-path: "./docs" # The path to your content directory
           github-token: ${{ secrets.GITHUB_TOKEN }} # This is a secret that GitHub automatically creates for you so you don't need to create it manually
-          base-path: ${{ steps.setup_pages.outputs.base_path }}
+          base-path: ${{ steps.setup_pages.outputs.base_path }} # The base path for your documentation GitHub Pages if you're not using custom domain
 ```
