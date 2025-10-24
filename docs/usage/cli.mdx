@@ -5,15 +5,15 @@ title: CLI
 ## Basic Usage
 
 ```bash
-speed-docs <origin-directory>
+speed-docs <content-directory>
 ```
 
-This will build your documentation and copy it to the `docs-output` directory. You can then deploy the `docs-output` directory to any static hosting service.
+This will build your documentation in the `content-directory` and copy the built documentation to the `docs-output` directory. You can then deploy the `docs-output` directory to any static hosting service.
 
 ## Development Mode
 
 ```bash
-speed-docs <origin-directory> --dev
+speed-docs <content-directory> --dev
 ```
 
 This will start a development server and watch for changes in your content directory. Any changes will be reflected in the documentation immediately.
@@ -21,7 +21,7 @@ This will start a development server and watch for changes in your content direc
 ## Custom Template
 
 ```bash
-speed-docs <origin-directory> --template <template-url>
+speed-docs <content-directory> --template <template-url>
 ```
 
 This will use a custom template instead of the default template. The template URL should be a URL to a tarball of a template repository.
@@ -29,7 +29,7 @@ This will use a custom template instead of the default template. The template UR
 ## Custom Download Directory
 
 ```bash
-speed-docs <origin-directory> --download-dir <path>
+speed-docs <content-directory> --download-dir <path>
 ```
 
 Speed docs will download the template to the tmp directory of your machine. You can override the default download directory by using this option.
@@ -37,7 +37,7 @@ Speed docs will download the template to the tmp directory of your machine. You 
 ## Custom Base Path
 
 ```bash
-speed-docs <origin-directory> --base-path <path>
+speed-docs <content-directory> --base-path <path>
 ```
 
 You can override the default base path by using this option. The base path is the base path of the documentation. For example, if you want to deploy your documentation to `https://example.com/my-docs`, you can use `--base-path /my-docs`.
@@ -45,7 +45,7 @@ You can override the default base path by using this option. The base path is th
 ## Force Download
 
 ```bash
-speed-docs <origin-directory> --force
+speed-docs <content-directory> --force
 ```
 
 By default, speed docs will check if the template is already downloaded. If it is, it will use the cached template. You can force the download of the template by using this option.
@@ -53,7 +53,7 @@ By default, speed docs will check if the template is already downloaded. If it i
 ## Include Hidden Files and Folders
 
 ```bash
-speed-docs <origin-directory> --include-hidden
+speed-docs <content-directory> --include-hidden
 ```
 
 By default, speed docs will ignore hidden files and folders. You can include hidden files and folders by using this option.
