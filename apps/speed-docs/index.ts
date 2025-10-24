@@ -382,7 +382,7 @@ async function copyOtherFilesToPublic(
 
 /**
  * Recursively finds and copies other files and folders from source to public directory
- * Excludes hidden files/folders, 'dir' directory, and 'config.json'
+ * Excludes hidden files/folders, 'dir' directory, 'docs-output' directory, and 'config.json'
  */
 async function copyOtherFilesRecursively(
   srcDir: string,
@@ -397,8 +397,8 @@ async function copyOtherFilesRecursively(
       continue;
     }
 
-    // Skip 'dir' directory and 'config.json'
-    if (item === "dir" || item === "config.json") {
+    // Skip 'dir' directory, 'docs-output' directory, and 'config.json'
+    if (item === "dir" || item === "docs-output" || item === "config.json") {
       continue;
     }
 
@@ -522,6 +522,11 @@ async function copyDirectory(
     for (const item of items) {
       // Skip hidden files and folders if includeHidden is false
       if (!includeHidden && item.startsWith(".")) {
+        continue;
+      }
+
+      // Skip 'docs-output' directory (build output)
+      if (item === "docs-output") {
         continue;
       }
 
