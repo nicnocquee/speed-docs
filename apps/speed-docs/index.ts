@@ -223,7 +223,8 @@ async function downloadTemplate(templateUrl?: string): Promise<string> {
  */
 async function validateAndCopyContent(
   originDir: string,
-  templatePath: string
+  templatePath: string,
+  includeHidden: boolean = false
 ): Promise<void> {
   try {
     console.log(
@@ -255,17 +256,17 @@ async function validateAndCopyContent(
     console.log(
       chalk.blue(`📋 Copying contents from ${originDir} to ${contentDir}...`)
     );
-    await copyDirectory(originDir, contentDir);
+    await copyDirectory(originDir, contentDir, includeHidden);
 
     // Step 5: Also copy image files to public directory
     console.log(chalk.blue(`🖼️  Copying image files to public directory...`));
-    await copyImagesToPublic(originDir, templatePath);
+    await copyImagesToPublic(originDir, templatePath, includeHidden);
 
     // Step 6: Copy all other non-hidden files and folders to public directory
     console.log(
       chalk.blue(`📁 Copying other files and folders to public directory...`)
     );
-    await copyOtherFilesToPublic(originDir, templatePath);
+    await copyOtherFilesToPublic(originDir, templatePath, includeHidden);
 
     console.log(chalk.green(`✅ Successfully validated and copied content!`));
   } catch (error) {
@@ -283,7 +284,8 @@ async function validateAndCopyContent(
  */
 async function copyImagesToPublic(
   originDir: string,
-  templatePath: string
+  templatePath: string,
+  includeHidden: boolean = false
 ): Promise<void> {
   // Common image file extensions
   const imageExtensions = [
@@ -306,7 +308,12 @@ async function copyImagesToPublic(
   }
 
   // Recursively find and copy image files
-  await copyImagesRecursively(originDir, publicDir, imageExtensions);
+  await copyImagesRecursively(
+    originDir,
+    publicDir,
+    imageExtensions,
+    includeHidden
+  );
 }
 
 /**
@@ -315,17 +322,28 @@ async function copyImagesToPublic(
 async function copyImagesRecursively(
   srcDir: string,
   publicDir: string,
-  imageExtensions: string[]
+  imageExtensions: string[],
+  includeHidden: boolean = false
 ): Promise<void> {
   const items = fs.readdirSync(srcDir);
 
   for (const item of items) {
+    // Skip hidden files and folders if includeHidden is false
+    if (!includeHidden && item.startsWith(".")) {
+      continue;
+    }
+
     const srcPath = path.join(srcDir, item);
     const stat = fs.statSync(srcPath);
 
     if (stat.isDirectory()) {
       // Recursively process subdirectories
-      await copyImagesRecursively(srcPath, publicDir, imageExtensions);
+      await copyImagesRecursively(
+        srcPath,
+        publicDir,
+        imageExtensions,
+        includeHidden
+      );
     } else {
       // Check if this is an image file
       const ext = path.extname(srcPath).toLowerCase();
@@ -349,7 +367,8 @@ async function copyImagesRecursively(
  */
 async function copyOtherFilesToPublic(
   originDir: string,
-  templatePath: string
+  templatePath: string,
+  includeHidden: boolean = false
 ): Promise<void> {
   // Ensure public directory exists
   const publicDir = path.join(templatePath, "public");
@@ -358,7 +377,7 @@ async function copyOtherFilesToPublic(
   }
 
   // Recursively find and copy other files and folders
-  await copyOtherFilesRecursively(originDir, publicDir);
+  await copyOtherFilesRecursively(originDir, publicDir, includeHidden);
 }
 
 /**
@@ -367,13 +386,14 @@ async function copyOtherFilesToPublic(
  */
 async function copyOtherFilesRecursively(
   srcDir: string,
-  publicDir: string
+  publicDir: string,
+  includeHidden: boolean = false
 ): Promise<void> {
   const items = fs.readdirSync(srcDir);
 
   for (const item of items) {
-    // Skip hidden files and folders (starting with .)
-    if (item.startsWith(".")) {
+    // Skip hidden files and folders if includeHidden is false
+    if (!includeHidden && item.startsWith(".")) {
       continue;
     }
 
@@ -393,7 +413,7 @@ async function copyOtherFilesRecursively(
       }
 
       // Recursively process subdirectories
-      await copyOtherFilesRecursively(srcPath, destDir);
+      await copyOtherFilesRecursively(srcPath, destDir, includeHidden);
     } else {
       // Copy file to public directory
       const fileName = path.basename(srcPath);
@@ -484,7 +504,11 @@ async function validateJsonFilesInDirectory(dirPath: string): Promise<void> {
 /**
  * Recursively copies a directory from source to destination
  */
-async function copyDirectory(src: string, dest: string): Promise<void> {
+async function copyDirectory(
+  src: string,
+  dest: string,
+  includeHidden: boolean = false
+): Promise<void> {
   const stat = fs.statSync(src);
 
   if (stat.isDirectory()) {
@@ -496,9 +520,14 @@ async function copyDirectory(src: string, dest: string): Promise<void> {
     // Copy all items in the directory
     const items = fs.readdirSync(src);
     for (const item of items) {
+      // Skip hidden files and folders if includeHidden is false
+      if (!includeHidden && item.startsWith(".")) {
+        continue;
+      }
+
       const srcPath = path.join(src, item);
       const destPath = path.join(dest, item);
-      await copyDirectory(srcPath, destPath);
+      await copyDirectory(srcPath, destPath, includeHidden);
     }
   } else {
     // Copy all files directly to destination
@@ -552,11 +581,15 @@ function runDevMode(templatePath: string): void {
 /**
  * Watches the origin directory for changes and copies content when files change
  */
-function watchOriginDirectory(originDir: string, templatePath: string): void {
+function watchOriginDirectory(
+  originDir: string,
+  templatePath: string,
+  includeHidden: boolean = false
+): void {
   console.log(chalk.blue(`👀 Watching for changes in: ${originDir}`));
 
   const watcher = chokidar.watch(originDir, {
-    ignored: /(^|[\/\\])\../, // ignore dotfiles
+    ignored: includeHidden ? undefined : /(^|[\/\\])\../, // ignore dotfiles only if includeHidden is false
     persistent: true,
   });
 
@@ -565,7 +598,7 @@ function watchOriginDirectory(originDir: string, templatePath: string): void {
       chalk.yellow(`📝 File changed: ${path.relative(originDir, filePath)}`)
     );
     try {
-      await validateAndCopyContent(originDir, templatePath);
+      await validateAndCopyContent(originDir, templatePath, includeHidden);
       console.log(chalk.green("✅ Content updated successfully"));
     } catch (error) {
       console.error(
@@ -583,7 +616,7 @@ function watchOriginDirectory(originDir: string, templatePath: string): void {
       chalk.yellow(`➕ File added: ${path.relative(originDir, filePath)}`)
     );
     try {
-      await validateAndCopyContent(originDir, templatePath);
+      await validateAndCopyContent(originDir, templatePath, includeHidden);
       console.log(chalk.green("✅ Content updated successfully"));
     } catch (error) {
       console.error(
@@ -601,7 +634,7 @@ function watchOriginDirectory(originDir: string, templatePath: string): void {
       chalk.yellow(`➖ File removed: ${path.relative(originDir, filePath)}`)
     );
     try {
-      await validateAndCopyContent(originDir, templatePath);
+      await validateAndCopyContent(originDir, templatePath, includeHidden);
       console.log(chalk.green("✅ Content updated successfully"));
     } catch (error) {
       console.error(
@@ -730,6 +763,10 @@ program
     "Override the default download/cache directory"
   )
   .option("--base-path <path>", "Override the default base path")
+  .option(
+    "--include-hidden",
+    "Include hidden files and directories (starting with .)"
+  )
   .action(
     async (
       originDir: string,
@@ -739,6 +776,7 @@ program
         force?: boolean;
         downloadDir?: string;
         basePath?: string;
+        includeHidden?: boolean;
       }
     ) => {
       try {
@@ -775,7 +813,11 @@ program
         await installDependencies(templatePath);
 
         // Copy content
-        await validateAndCopyContent(resolvedOriginDir, templatePath);
+        await validateAndCopyContent(
+          resolvedOriginDir,
+          templatePath,
+          options.includeHidden
+        );
 
         if (options.dev) {
           // Development mode
@@ -783,7 +825,11 @@ program
           console.log(chalk.yellow("Press Ctrl+C to stop"));
 
           // Start file watching
-          watchOriginDirectory(resolvedOriginDir, templatePath);
+          watchOriginDirectory(
+            resolvedOriginDir,
+            templatePath,
+            options.includeHidden
+          );
 
           // Start dev server
           runDevMode(templatePath);
