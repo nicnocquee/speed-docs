@@ -1,0 +1,34 @@
+---
+title: GitHub Action
+---
+
+You can deploy your documentation to GitHub Pages by using the [Speed Docs GitHub Action](https://github.com/nicnocquee/speed-docs-github-action).
+
+## Usage
+
+You can use the following workflow to deploy your documentation to GitHub Pages:
+
+```yaml
+name: Deploy Documentation
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Pages
+        id: setup_pages
+        uses: actions/configure-pages@v5
+
+      - name: Deploy docs to GitHub Pages
+        uses: nicnocquee/speed-docs-github-action@v1
+        with:
+          content-path: "./docs" # The path to your content directory
+          github-token: ${{ secrets.GITHUB_TOKEN }} # This is a secret that GitHub automatically creates for you so you don't need to create it manually
+          base-path: ${{ steps.setup_pages.outputs.base_path }}
+```

@@ -1,0 +1,5 @@
+{
+  "title": "Usage",
+  "icon": "MyIcon",
+  "pages": ["cli", "github-action"]
+}

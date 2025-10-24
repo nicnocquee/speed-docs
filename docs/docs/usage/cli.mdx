@@ -1,0 +1,51 @@
+---
+title: CLI
+---
+
+## Basic Usage
+
+```bash
+speed-docs <origin-directory>
+```
+
+This will build your documentation and copy it to the `docs-output` directory. You can then deploy the `docs-output` directory to any static hosting service.
+
+## Development Mode
+
+```bash
+speed-docs <origin-directory> --dev
+```
+
+This will start a development server and watch for changes in your content directory. Any changes will be reflected in the documentation immediately.
+
+## Custom Template
+
+```bash
+speed-docs <origin-directory> --template <template-url>
+```
+
+This will use a custom template instead of the default template. The template URL should be a URL to a tarball of a template repository.
+
+## Custom Download Directory
+
+```bash
+speed-docs <origin-directory> --download-dir <path>
+```
+
+Speed docs will download the template to the tmp directory of your machine. You can override the default download directory by using this option.
+
+## Custom Base Path
+
+```bash
+speed-docs <origin-directory> --base-path <path>
+```
+
+You can override the default base path by using this option. The base path is the base path of the documentation. For example, if you want to deploy your documentation to `https://example.com/my-docs`, you can use `--base-path /my-docs`.
+
+## Force Download
+
+```bash
+speed-docs <origin-directory> --force
+```
+
+By default, speed docs will check if the template is already downloaded. If it is, it will use the cached template. You can force the download of the template by using this option.
