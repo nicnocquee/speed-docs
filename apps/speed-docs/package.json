@@ -6,6 +6,10 @@
   "bin": {
     "speed-docs": "./dist/index.js"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/nicnocquee/speed-docs"
+  },
   "type": "module",
   "files": [
     "dist",
@@ -25,7 +29,10 @@
     "content",
     "validation"
   ],
-  "author": "",
+  "author": {
+    "name": "Nico Prananta",
+    "url": "https://nico.fyi"
+  },
   "license": "MIT",
   "dependencies": {
     "chalk": "^5.3.0",
