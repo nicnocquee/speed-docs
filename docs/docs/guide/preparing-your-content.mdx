@@ -2,6 +2,8 @@
 title: Preparing your content
 ---
 
+import { File, Folder, Files } from "fumadocs-ui/components/files";
+
 ## Content structure
 
 Your content directory should have:
@@ -11,21 +13,23 @@ Your content directory should have:
 
 and structured like this:
 
-```
-content/
-├── config.json          # Documentation configuration
-└── docs/                # Your documentation content
-    ├── index.mdx
-    ├── ...
-    ├── getting-started/
-    │   ├── meta.json
-    │   └── content.mdx
-    ├── ...
-    └── api/
-        ├── meta.json
-        └── reference.mdx
-        ├── ...
-```
+<Files defaultOpen={true}>
+  <Folder name="content" defaultOpen={true}>
+    <File name="config.json" />
+    <File name="logo.png" />
+    <Folder name="docs" defaultOpen={true}>
+      <File name="index.mdx" />
+      <Folder name="getting-started" defaultOpen={true}>
+        <File name="meta.json" />
+        <File name="content.mdx" />
+      </Folder>
+      <Folder name="api" defaultOpen={true}>
+        <File name="meta.json" />
+        <File name="reference.mdx" />
+      </Folder>
+    </Folder>
+  </Folder>
+</Files>
 
 The config.json file should contain your documentation configuration:
 

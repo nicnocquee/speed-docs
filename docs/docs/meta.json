@@ -1,5 +1,5 @@
 {
   "title": "Introduction",
-  "pages": ["index", "guide", "usage"],
+  "pages": ["index", "guide", "usage", "writing"],
   "root": true
 }
