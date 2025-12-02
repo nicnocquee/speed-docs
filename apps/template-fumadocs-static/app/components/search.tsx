@@ -28,6 +28,10 @@ export default function DefaultSearchDialog(props: SharedProps) {
     type: "static",
     initOrama,
     locale,
+    from: (process.env.PAGES_BASE_PATH
+      ? `${process.env.PAGES_BASE_PATH}/api/search`
+      : "/api/search"
+    ).replace(/([^:])\/\/+/g, "$1/"),
   });
 
   return (
