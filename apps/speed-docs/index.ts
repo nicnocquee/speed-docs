@@ -680,7 +680,7 @@ async function buildAndCopyOutput(
       stdio: "inherit",
       env: {
         ...process.env,
-        PAGES_BASE_PATH: basePath,
+        NEXT_PUBLIC_BASE_PATH: basePath,
       },
     });
     console.log(chalk.green("✅ Build completed successfully"));

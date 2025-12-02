@@ -17,7 +17,7 @@ const parseConfig = (
 } => {
   const theConfig = config;
   if ("image" in config.nav && config.nav.image) {
-    const prefix = process.env.PAGES_BASE_PATH || "";
+    const prefix = process.env.NEXT_PUBLIC_BASE_PATH || "";
     theConfig.nav.image = prefix + config.nav.image;
   }
   return theConfig;
