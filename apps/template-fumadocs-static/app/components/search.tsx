@@ -29,7 +29,6 @@ export default function DefaultSearchDialog(props: SharedProps) {
       ? `${process.env.NEXT_PUBLIC_BASE_PATH}/api/search`
       : "/api/search"
   ).replace(/([^:])\/\/+/g, "$1/");
-  console.log(from);
   const { search, setSearch, query } = useDocsSearch({
     type: "static",
     initOrama,
