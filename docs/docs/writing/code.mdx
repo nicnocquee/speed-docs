@@ -1,0 +1,202 @@
+---
+title: Code
+---
+
+## Highlighting lines
+
+You can highlight specific lines of code using `// [!code highlight]`, or words in the code using `[!code word:the-word-to-highlight]`. For example, the following mdx code:
+
+````mdx title="code.mdx"
+```js title="config.js"
+import createMDX from "fumadocs-mdx/config";
+
+const withMDX = createMDX();
+
+// [!code_word:config] // Replace underscore with a space.
+/** @type {import('next').NextConfig} */
+const config = {
+  // [!code_highlight]
+  reactStrictMode: true, // [!code_highlight]
+}; // [!code_highlight]
+
+export default withMDX(config);
+```
+````
+
+which will be rendered as
+
+```js title="config.js"
+import createMDX from "fumadocs-mdx/config";
+
+const withMDX = createMDX();
+
+// [!code word:config]
+/** @type {import('next').NextConfig} */
+const config = {
+  reactStrictMode: true, // [!code highlight]
+}; // [!code highlight]
+
+export default withMDX(config);
+```
+
+<Callout type="warning" title="Warning">
+  Use `[!code word]` and `[!code highlight]` instead of `[!code_word]` and
+  `[!code_highlight]`. In the example above, underscore is used to prevent the
+  directive from kicking in the code block.
+</Callout>
+
+You can also highlight a certain number of lines of code, for example, `// [!code highlight:2]` will highlight two lines of code after the directive. For example, the following mdx code:
+
+````mdx title="code.mdx"
+```ts title="app/routes.ts"
+import { route, type RouteConfig } from "@react-router/dev/routes";
+
+export default [
+  // [!code_highlight:2] // Replace underscore with a space.
+  route(":lang", "routes/home.tsx"),
+  route(":lang/docs/*", "docs/page.tsx"),
+  route("api/search", "docs/search.ts"),
+] satisfies RouteConfig;
+```
+````
+
+will be rendered as
+
+```ts title="app/routes.ts"
+import { route, type RouteConfig } from "@react-router/dev/routes";
+
+export default [
+  // [!code highlight:2]
+  route(":lang", "routes/home.tsx"),
+  route(":lang/docs/*", "docs/page.tsx"),
+  route("api/search", "docs/search.ts"),
+] satisfies RouteConfig;
+```
+
+### Focus a line
+
+Using `// [!code focus]` will focus the line. For example, the following mdx code:
+
+````mdx title="code.mdx"
+```ts
+console.log("Not focused");
+console.log("Focused"); // [!code_focus] // Replace underscore with a space.
+console.log("Not focused");
+```
+````
+
+which will be rendered as
+
+```ts
+console.log("Not focused");
+console.log("Focused"); // [!code focus]
+console.log("Not focused");
+```
+
+## Code block icon
+
+Supported icons will be rendered. For example, the following tsx code block will be rendered with the React icon.
+
+````
+```tsx title="code.tsx"
+export function MyComponent() {
+  return <div>Hello World</div>;
+}
+```
+````
+
+which will be rendered as:
+
+```tsx title="code.tsx"
+export function MyComponent() {
+  return <div>Hello World</div>;
+}
+```
+
+Or PHP code:
+
+```php title="Kernel.php"
+<?php
+
+namespace App\Console;
+
+use Illuminate\Console\Scheduling\Schedule;
+use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
+
+class Kernel extends ConsoleKernel
+{
+    /**
+     * Define the application's command schedule.
+     */
+    protected function schedule(Schedule $schedule): void
+    {
+        // $schedule->command('inspire')->hourly();
+    }
+
+    /**
+     * Register the commands for the application.
+     */
+    protected function commands(): void
+    {
+        $this->load(__DIR__.'/Commands');
+
+        require base_path('routes/console.php');
+    }
+}
+```
+
+See more supported languages [here](https://shiki.style/languages).
+
+## Twoslash
+
+You can render twoslash code blocks in your documentation by using the `twoslash` component.
+
+````mdx
+```ts twoslash lineNumbers
+const a = "Hello World";
+//    ^?
+console.log(a);
+```
+````
+
+which will be rendered as:
+
+```ts twoslash lineNumbers
+const a = "Hello World";
+//    ^?
+console.log(a);
+```
+
+### Completions
+
+```ts
+// @noErrors
+console.e;
+//      ^|
+```
+
+```ts twoslash
+// @noErrors
+console.e;
+//      ^|
+```
+
+### Highlighting
+
+You can highlight specific parts of the code by using the `^^^` symbol.
+
+```ts
+function add(a: number, b: number) {
+  //     ^^^
+  return a + b;
+}
+```
+
+which will be rendered as:
+
+```ts twoslash
+function add(a: number, b: number) {
+  //     ^^^
+  return a + b;
+}
+```

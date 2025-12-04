@@ -2,8 +2,28 @@
 title: Accordion
 ---
 
+You can render accordions in your documentation by using the `Accordion` component.
+
+```mdx title="accordion.mdx"
+---
+title: Accordion
+---
+
 import { Accordion, Accordions } from "fumadocs-ui/components/accordion";
 
 <Accordions type="single">
-  <Accordion title="My Title">My Content</Accordion>
+  <Accordion title="Row 1">My Content Row 1</Accordion>
+  <Accordion title="Row 2">My Content Row 2</Accordion>
+  <Accordion title="Row 3">My Content Row 3</Accordion>
+</Accordions>
+```
+
+which will be rendered as:
+
+import { Accordion, Accordions } from "fumadocs-ui/components/accordion";
+
+<Accordions type="single">
+  <Accordion title="Row 1">My Content Row 1</Accordion>
+  <Accordion title="Row 2">My Content Row 2</Accordion>
+  <Accordion title="Row 3">My Content Row 3</Accordion>
 </Accordions>

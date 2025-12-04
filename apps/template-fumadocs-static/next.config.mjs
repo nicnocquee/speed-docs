@@ -10,6 +10,7 @@ const config = {
     unoptimized: true,
   },
   basePath: process.env.NEXT_PUBLIC_BASE_PATH,
+  serverExternalPackages: ["typescript", "twoslash"],
 };
 
 export default withMDX(config);

@@ -2,7 +2,28 @@
 title: Tabs
 ---
 
-<Tabs items={["Javascript", "Rust"]}>
-  <Tab value="Javascript">Javascript is weird</Tab>
-  <Tab value="Rust">Rust is fast</Tab>
-</Tabs>
+You can render tabs in your documentation by using the `Tabs` component.
+
+````mdx title="tabs.mdx"
+---
+title: Tabs
+---
+
+```ts lineNumbers tab="Javascript"
+console.log("Javascript is weird");
+```
+
+```rust lineNumbers tab="Rust"
+console.log("Rust is fast");
+```
+````
+
+which will be rendered as:
+
+```ts lineNumbers tab="Javascript"
+console.log("Javascript is weird");
+```
+
+```rust lineNumbers tab="Rust"
+console.log("Rust is fast");
+```

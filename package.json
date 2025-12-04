@@ -10,10 +10,15 @@
     "start": "turbo start",
     "lint": "turbo lint",
     "type-check": "turbo type-check",
-    "release-action": "./scripts/release-action.sh"
+    "release-action": "./scripts/release-action.sh",
+    "docs:sync": "cd apps/template-fumadocs-static && /bin/rm -rf content && cp -r ../../docs content",
+    "docs:watch": "chokidar \"docs/**/*\" -c \"pnpm run docs:sync\"",
+    "docs:dev": "pnpm run docs:sync && concurrently \"pnpm run docs:watch\" \"cd apps/template-fumadocs-static && pnpm run dev\""
   },
   "dependencies": {},
   "devDependencies": {
+    "chokidar-cli": "^3.0.0",
+    "concurrently": "^9.1.0",
     "turbo": "^2.3.3"
   }
 }
