@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "build": "next build",
+    "prebuild": "fumadocs-mdx",
     "dev": "next dev",
     "start": "next start",
     "postinstall": "fumadocs-mdx",

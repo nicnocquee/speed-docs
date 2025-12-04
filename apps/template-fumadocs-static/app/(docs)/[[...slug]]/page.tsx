@@ -9,12 +9,24 @@ import { notFound } from "next/navigation";
 import { createRelativeLink } from "fumadocs-ui/mdx";
 import { getMDXComponents } from "@/mdx-components";
 import config from "@/content/config.json";
+import type { Page } from "fumadocs-core/source";
+import type { ComponentType } from "react";
+
+type PageData = {
+  body: ComponentType<{ components?: any }>;
+  toc?: any;
+  full?: boolean;
+  title?: string;
+  description?: string;
+};
+
+type PageWithData = Page<PageData>;
 
 export default async function Page(props: {
   params: Promise<{ slug?: string[] }>;
 }) {
   const params = await props.params;
-  const page = source.getPage(params.slug);
+  const page = source.getPage(params.slug) as PageWithData | undefined;
   if (!page) notFound();
 
   const MDXContent = page.data.body;
@@ -43,7 +55,7 @@ export async function generateMetadata(props: {
   params: Promise<{ slug?: string[] }>;
 }) {
   const params = await props.params;
-  const page = source.getPage(params.slug);
+  const page = source.getPage(params.slug) as PageWithData | undefined;
   if (!page) notFound();
 
   return {

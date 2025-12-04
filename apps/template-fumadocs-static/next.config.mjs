@@ -9,7 +9,7 @@ const config = {
   images: {
     unoptimized: true,
   },
-  basePath: process.env.NEXT_PUBLIC_BASE_PATH,
+  basePath: process.env.NEXT_PUBLIC_BASE_PATH ?? undefined,
   serverExternalPackages: ["typescript", "twoslash"],
 };
 
