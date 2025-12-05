@@ -2,6 +2,22 @@
 title: CLI
 ---
 
+## Initialize Docs Directory
+
+```bash
+speed-docs init [--dir <path>]
+```
+
+This command downloads the docs directory template from GitHub and initializes it in the specified directory (or current working directory if not specified). The CNAME file is automatically removed.
+
+```bash
+# Initialize in current directory
+speed-docs init
+
+# Initialize in a specific directory
+speed-docs init --dir ./my-docs
+```
+
 ## Basic Usage
 
 ```bash
