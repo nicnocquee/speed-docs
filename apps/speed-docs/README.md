@@ -40,6 +40,22 @@ The config.json file should contain your documentation configuration:
 
 Put the images in the root of content directory. In the example above, put the images in `content` directory.
 
+### Initialize Docs Directory
+
+```bash
+speed-docs init [--dir <path>]
+```
+
+This command downloads the docs directory template from GitHub and initializes it in the specified directory (or current working directory if not specified). The CNAME file is automatically removed.
+
+```bash
+# Initialize in current directory
+speed-docs init
+
+# Initialize in a specific directory
+speed-docs init --dir ./my-docs
+```
+
 ### Basic Usage
 
 ```bash
@@ -67,6 +83,10 @@ speed-docs <origin-directory> --download-dir <path>
 ### Examples
 
 ```bash
+# Initialize a new docs directory
+speed-docs init
+speed-docs init --dir ./my-docs
+
 # Build static documentation
 speed-docs ./my-content
 
@@ -123,7 +143,19 @@ Speed-docs automates the entire documentation creation process:
 - Outputs the built documentation to a `docs-output` directory
 - Ready for deployment to any static hosting service
 
-## Command Line Options
+## Commands
+
+### `init`
+
+Initialize a docs directory from the template.
+
+| Option         | Description                                                         |
+| -------------- | ------------------------------------------------------------------- |
+| `--dir <path>` | Target directory to initialize docs (defaults to current directory) |
+
+### Main Command
+
+Build documentation from a content directory.
 
 | Option                  | Description                                             |
 | ----------------------- | ------------------------------------------------------- |
@@ -132,6 +164,8 @@ Speed-docs automates the entire documentation creation process:
 | `--template <url>`      | Override the default template repository URL            |
 | `--force`               | Force redownload and reinstall template (ignores cache) |
 | `--download-dir <path>` | Override the default download/cache directory           |
+| `--base-path <path>`    | Override the default base path                          |
+| `--include-hidden`      | Include hidden files and directories                    |
 
 ## Features
 

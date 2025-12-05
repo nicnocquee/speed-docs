@@ -24,6 +24,7 @@ const version = packageJson.version;
 const TEMPLATE_REPO_URL =
   "https://github.com/nicnocquee/speed-docs/archive/refs/heads/main.tar.gz";
 const TEMPLATE_SUBDIR = "speed-docs-main/apps/template-fumadocs-static";
+const DOCS_SUBDIR = "speed-docs-main/docs";
 
 // Default cache directory for templates
 const DEFAULT_CACHE_DIR = path.join(os.homedir(), ".speed-docs", "cache");
@@ -752,6 +753,83 @@ async function buildAndCopyOutput(
   }
 }
 
+/**
+ * Downloads the docs directory from GitHub and initializes it in the target directory
+ */
+async function initDocsDirectory(targetDir: string): Promise<void> {
+  console.log(chalk.blue(`📥 Downloading docs directory from GitHub...`));
+
+  const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "speed-docs-init-"));
+  const tarPath = path.join(tmpDir, "repo.tar.gz");
+
+  try {
+    const response = await fetch(TEMPLATE_REPO_URL);
+    if (!response.ok) {
+      throw new Error(`Failed to download repository: ${response.statusText}`);
+    }
+
+    const buffer = await response.arrayBuffer();
+    fs.writeFileSync(tarPath, Buffer.from(buffer));
+
+    console.log(chalk.green("✅ Repository downloaded successfully"));
+
+    // Extract the tar file
+    console.log(chalk.blue("📦 Extracting repository..."));
+    await tar.extract({
+      file: tarPath,
+      cwd: tmpDir,
+    });
+
+    const extractedDocsPath = path.join(tmpDir, DOCS_SUBDIR);
+    if (!fs.existsSync(extractedDocsPath)) {
+      throw new Error(
+        "Extraction failed - docs directory not found in repository"
+      );
+    }
+
+    // Ensure target directory exists
+    const resolvedTargetDir = path.resolve(targetDir);
+    if (!fs.existsSync(resolvedTargetDir)) {
+      fs.mkdirSync(resolvedTargetDir, { recursive: true });
+    }
+
+    // Copy docs directory contents to target directory
+    console.log(chalk.blue(`📋 Copying docs to ${resolvedTargetDir}...`));
+    await copyDirectory(extractedDocsPath, resolvedTargetDir, true);
+
+    // Remove CNAME file if it exists
+    const cnamePath = path.join(resolvedTargetDir, "CNAME");
+    if (fs.existsSync(cnamePath)) {
+      fs.unlinkSync(cnamePath);
+      console.log(chalk.yellow("🗑️  Removed CNAME file"));
+    }
+
+    console.log(chalk.green("✅ Docs directory initialized successfully"));
+    console.log(
+      chalk.green(
+        `📁 Docs directory has been initiated in: ${resolvedTargetDir}`
+      )
+    );
+
+    // Clean up temporary files
+    fs.rmSync(tmpDir, { recursive: true, force: true });
+  } catch (error) {
+    // Clean up temporary files on error
+    if (fs.existsSync(tmpDir)) {
+      fs.rmSync(tmpDir, { recursive: true, force: true });
+    }
+
+    console.error(
+      chalk.red(
+        `❌ Error initializing docs directory: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      )
+    );
+    throw error;
+  }
+}
+
 // CLI setup
 const program = new Command();
 
@@ -759,6 +837,30 @@ program
   .name("speed-docs")
   .description("A CLI tool to create online documentation quickly")
   .version(version);
+
+program
+  .command("init")
+  .description("Initialize a docs directory from the template")
+  .option(
+    "--dir <path>",
+    "Target directory to initialize docs (defaults to current working directory)",
+    process.cwd()
+  )
+  .action(async (options: { dir?: string }) => {
+    try {
+      const targetDir = options.dir || process.cwd();
+      console.log(chalk.blue(`🚀 Speed Docs CLI v${version}`));
+      console.log(chalk.blue("=================="));
+      await initDocsDirectory(targetDir);
+    } catch (error) {
+      console.error(
+        chalk.red(
+          `❌ Error: ${error instanceof Error ? error.message : String(error)}`
+        )
+      );
+      process.exit(1);
+    }
+  });
 
 program
   .argument(
